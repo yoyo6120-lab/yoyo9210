@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과즙세연 시그 목록</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        /* 1. 디자인 (CSS) */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0b0b0e;
+            color: #e2e8f0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 📱 반응형 고급 배너 스타일 */
+        .banner-container {
+            width: 100%;
+            max-width: 650px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .banner-img {
+            width: 100%;
+            display: block;
+            border-radius: 22px;
+            border: 2px solid #d4af37;
+            height: auto;
+            box-shadow:
+                0 0 20px rgba(255, 215, 0, 0.15),
+                0 0 40px rgba(255, 64, 159, 0.08);
+        }
+
+        /* 관리자 로그인 상태창 */
+        .admin-status-bar {
+            width: 100%;
+            max-width: 650px;
+            text-align: right;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        .admin-link-btn {
+            background: none;
+            border: none;
+            color: #475569;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: underline;
+        }
+        .admin-link-btn:hover { color: #ff409f; }
+        
+        #changePwBtn { display: none; color: #64748b; }
+
+        /* 검색창 */
+        .search-container {
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            background-color: #16161f;
+            border: 1px solid #272733;
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+        }
+        .search-input:focus { outline: none; border-color: #ff409f; }
+
+        /* 필터 버튼 영역 */
+        .filter-section {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .filter-btn {
+            background-color: #16161f;
+            color: #cbd5e1;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { transform: translateY(-2px); }
+
+        /* 활성화 스타일 */
+        .filter-btn.active[data-type="all"] { background-color: #ffffff; color: #000000; }
+        .filter-btn.active[data-type="range"] { background-color: #3b82f6; color: #ffffff; }
+        .filter-btn.active[data-type="hot"] { background: linear-gradient(135deg, #ff4d00, #ff007f); color: #ffffff; }
+        .filter-btn.active[data-type="new"] { background: linear-gradient(135deg, #00f3ff, #0077ff); color: #ffffff; }
+        .filter-btn.active[data-type="star"] { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000000; }
+        .filter-btn.active[data-type="bangsel"] { background: linear-gradient(135deg, #ae4dff, #ff00e4); color: #ffffff; }
+        .filter-btn.active[data-type="roulette"] { background: linear-gradient(135deg, #00e575, #8ce800); color: #000000; }
+        .filter-btn.active[data-type="etc"] { background: linear-gradient(135deg, #4da6ff, #003fff); color: #ffffff; }
+
+        /* 관리자 편집 패널 */
+        .admin-panel {
+            width: 100%;
+            max-width: 650px;
+            background-color: #161624;
+            border: 1px solid #ff409f;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        .admin-panel h3 { margin-top: 0; color: #ff409f; font-size: 16px; }
+        .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        .form-input {
+            background-color: #0b0b0e;
+            border: 1px solid #222232;
+            border-radius: 6px;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .btn-submit {
+            background-color: #ff409f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-submit:hover { background-color: #d92680; }
+
+        /* 테이블 스타일 */
+        .table-container {
+            width: 100%;
+            max-width: 650px;
+            border: 1px solid #1f1f29;
+            border-radius: 18px;
+            overflow: hidden;
+            background-color: #111116;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 18px; }
+        th { background-color: #16161f; color: #94a3b8; font-size: 14px; }
+        td { border-top: 1px solid #1d1d28; font-size: 15px; vertical-align: middle; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* 관리자 모드에서 숨김 처리된 행의 비주얼 피드백 */
+        tr.row-hidden { opacity: 0.4; background-color: rgba(0, 0, 0, 0.3); }
+
+        .num-col { width: 90px; color: #94a3b8; font-weight: bold; }
+        .title-col { color: #f8fafc; font-weight: 500; }
+        .action-col { width: 340px; text-align: right; display: none; }
+
+        /* 인라인 에디터 인풋 스타일 */
+        .inline-edit-input {
+            background-color: #1c1c27;
+            border: 1px solid #ff409f;
+            border-radius: 6px;
+            color: white;
+            padding: 6px 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* 한 줄 즉시 분류 편집기 스타일 */
+        .inline-tag-editor {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .tag-row {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .btn-inline-tag {
+            background-color: #1c1c27;
+            border: 1px solid #2d2d3f;
+            color: #94a3b8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-inline-tag:hover { border-color: #ff409f; color: white; }
+        
+        /* 다이렉트 분류 선택 시 강조 효과 */
+        .btn-inline-tag.active-none { background-color: #334155; color: white; border-color: #475569; }
+        .btn-inline-tag.active-hot { background-color: rgba(255, 80, 80, 0.25); color: #ff5555; border-color: #ff5555; }
+        .btn-inline-tag.active-new { background-color: rgba(0, 255, 255, 0.25); color: #00f7ff; border-color: #00f7ff; }
+        .btn-inline-tag.active-star { background-color: rgba(255, 215, 0, 0.25); color: gold; border-color: gold; }
+        .btn-inline-tag.active-bangsel { background-color: rgba(174, 77, 255, 0.25); color: #d680ff; border-color: #d680ff; }
+        .btn-inline-tag.active-roulette { background-color: rgba(0, 229, 117, 0.25); color: #00ff84; border-color: #00ff84; }
+        .btn-inline-tag.active-etc { background-color: rgba(77, 166, 255, 0.25); color: #66b2ff; border-color: #66b2ff; }
+
+        /* 기능성 버튼 제어 스타일 (수정/삭제/숨김) */
+        .btn-inline-util {
+            background-color: #27273a;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-inline-util:hover { background-color: #3f3f5c; color: white; }
+
+        .btn-inline-hide { background-color: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3); color: #eab308; }
+        .btn-inline-hide:hover { background-color: #eab308; color: black; }
+        .btn-inline-hide.active-hidden { background-color: #eab308; color: black; border-color: #eab308; }
+
+        .btn-inline-del { background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; }
+        .btn-inline-del:hover { background-color: #ef4444; color: white; }
+
+        /* 태그 배지 */
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+        .badge-hot { background-color: rgba(255, 80, 80, 0.15); color: #ff5555; }
+        .badge-new { background-color: rgba(0, 255, 255, 0.15); color: #00f7ff; }
+        .badge-star { background-color: rgba(255, 215, 0, 0.15); color: gold; }
+        .badge-bangsel { background-color: rgba(174, 77, 255, 0.15); color: #d680ff; }
+        .badge-roulette { background-color: rgba(0, 229, 117, 0.15); color: #00ff84; }
+        .badge-etc { background-color: rgba(77, 166, 255, 0.15); color: #66b2ff; }
+        .badge-hidden { background-color: #eab308; color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-status-bar">
+        <button id="changePwBtn" class="admin-link-btn" onclick="changeAdminPassword()">🔑 비밀번호 변경</button>
+        <button id="adminLoginBtn" class="admin-link-btn" onclick="toggleAdminMode()">🔒 관리자 모드 로그인</button>
+    </div>
+
+    <div class="banner-container">
+        <img src="https://stimg.sooplive.com/NORMAL_BBS/0/14909290/80466a1839bf0c26b.png" alt="과즙세연 시그 목록" class="banner-img">
+    </div>
+
+    <div id="adminPanel" class="admin-panel">
+        <h3>✨ 시그 및 항목 신규 추가</h3>
+        <div class="form-group">
+            <input type="number" id="formNum" class="form-input" style="width: 100px;" placeholder="개수(번호)">
+            <input type="text" id="formTitle" class="form-input" style="flex-grow: 1;" placeholder="내용 및 제목을 입력하세요">
+            <select id="formTag" class="form-input">
+                <option value="">일반 분류</option>
+                <option value="hot">HOT 🔥</option>
+                <option value="new">NEW ✨</option>
+                <option value="star">열혈 ⭐</option>
+                <option value="bangsel">방셀 📸</option>
+                <option value="roulette">룰렛 🎰</option>
+                <option value="etc">기타 🎸</option>
+            </select>
+            <button class="btn-submit" onclick="addSigItem()">확인/추가</button>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="번호 또는 제목 검색">
+    </div>
+
+    <div class="filter-section">
+        <div class="filter-group" style="margin-bottom: 5px;">
+            <button class="filter-btn active" data-type="all" onclick="filterData('all', null, this)">전체</button>
+            <button class="filter-btn" data-type="hot" onclick="filterData('tag', 'hot', this)">HOT 🔥</button>
+            <button class="filter-btn" data-type="new" onclick="filterData('tag', 'new', this)">NEW ✨</button>
+            <button class="filter-btn" data-type="star" onclick="filterData('tag', 'star', this)">열혈 ⭐</button>
+            <button class="filter-btn" data-type="bangsel" onclick="filterData('tag', 'bangsel', this)">방셀 📸</button>
+            <button class="filter-btn" data-type="roulette" onclick="filterData('tag', 'roulette', this)">룰렛 🎰</button>
+            <button class="filter-btn" data-type="etc" onclick="filterData('tag', 'etc', this)">기타 🎸</button>
+        </div>
+        <div class="filter-group">
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [100, 199], this)">100~199</button>
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [200, 299], this)">200~299</button>
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [300, 399], this)">300~399</button>
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [400, 499], this)">400~499</button>
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [500, 999], this)">500~999</button>
+            <button class="filter-btn" data-type="range" onclick="filterData('range', [1000, 999999], this)">1000~</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="num-col">개수(번호)</th>
+                    <th>내용</th>
+                    <th class="action-col" id="thAction">원클릭 항목 관리</th>
+                </tr>
+            </thead>
+            <tbody id="sigTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const DEFAULT_HASHED_PW = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+        let isAdmin = false;
+        let editingIndex = null; // 현재 인라인 수정 중인 원본 항목 인덱스 관리
+
+        const defaultData = [
+            { num: 66, title: "신청곡 (가수명과 제목을 적어서)", tags: ["etc"] },
+            { num: 99, title: "일반 룰렛", tags: ["roulette"] },
+            { num: 188, title: "Overdrive", tags: [] }, { num: 200, title: "외모체크", tags: ["hot"] }, 
+            { num: 202, title: "너뿐이야", tags: [] }, { num: 222, title: "포켓몬댄스", tags: [] },
+            { num: 224, title: "힙사사돈", tags: [] }, { num: 227, title: "삐삐송", tags: [] },
+            { num: 234, title: "FLI:P", tags: [] }, { num: 244, title: "삐끼삐끼", tags: ["hot"] },
+            { num: 245, title: "미야오", tags: ["new"] }, { num: 252, title: "언터쳐블", tags: [] },
+            { num: 257, title: "모찌송", tags: [] }, { num: 262, title: "부리부리", tags: [] },
+            { num: 266, title: "뿌에뿌에", tags: [] }, { num: 272, title: "캐치캐치", tags: [] },
+            { num: 277, title: "카리나닮았대", tags: [] }, { num: 282, title: "노래 1절", tags: ["etc"] },
+            { num: 298, title: "WTF", tags: [] }, { num: 301, title: "일반 시그 랜덤 룰렛", tags: ["roulette"] },
+            { num: 305, title: "체온", tags: [] }, { num: 312, title: "날라리", tags: [] },
+            { num: 313, title: "루머", tags: [] }, { num: 325, title: "홀드업", tags: [] },
+            { num: 332, title: "bass down low", tags: [] }, { num: 333, title: "킥드럼베이스", tags: [] },
+            { num: 341, title: "라라리라라", tags: [] }, { num: 345, title: "버블", tags: [] },
+            { num: 357, title: "이머전시", tags: [] }, { num: 365, title: "트월킹덕", tags: [] },
+            { num: 369, title: "버터플라이", tags: [] }, { num: 416, title: "KEEP IT SEXY", tags: [] },
+            { num: 423, title: "인더클럽", tags: [] }, { num: 424, title: "귀여워", tags: [] },
+            { num: 434, title: "핑크레이디", tags: [] }, { num: 444, title: "슈퍼스타", tags: [] },
+            { num: 449, title: "계엄령", tags: [] }, { num: 456, title: "간바레센빠이", tags: [] },
+            { num: 468, title: "스티키", tags: ["hot"] }, { num: 472, title: "마티니", tags: [] },
+            { num: 474, title: "룩앳미", tags: [] }, { num: 477, title: "위플래쉬", tags: ["new"] },
+            { num: 480, title: "ㅃ킹뱅어", tags: [] }, { num: 497, title: "스마트", tags: [] },
+            { num: 499, title: "터미널", tags: [] }, { num: 501, title: "섹시 시그 랜덤 룰렛", tags: ["roulette"] },
+            { num: 524, title: "라잌유베러", tags: [] }, { num: 530, title: "쥬시위글", tags: [] },
+            { num: 531, title: "롯데삼진송", tags: [] }, { num: 533, title: "헤이센세", tags: [] },
+            { num: 554, title: "아헤가오", tags: [] }, { num: 555, title: "꼬마선장 / 노래 완곡", tags: ["etc"] },
+            { num: 557, title: "KT피리송", tags: [] }, { num: 567, title: "퀸카", tags: [] },
+            { num: 579, title: "클락션", tags: [] }, { num: 593, title: "과즙세연 어셈블", tags: ["hot"] },
+            { num: 599, title: "앙카존", tags: [] }, { num: 626, title: "마그네틱", tags: [] },
+            { num: 656, title: "패스트카", tags: [] }, { num: 662, title: "드라군", tags: [] },
+            { num: 662, title: "씨띵 666", tags: [] }, { num: 697, title: "야메떼", tags: [] },
+            { num: 702, title: "제로투 (욕로투) 이벤트", tags: [] }, { num: 717, title: "궁예", tags: [] },
+            { num: 747, title: "슬램덩크", tags: [] }, { num: 788, title: "테디베어", tags: [] },
+            { num: 797, title: "오니짱", tags: [] }, { num: 857, title: "바우치", tags: [] },
+            { num: 858, title: "오빠달려붕붕", tags: [] }, { num: 888, title: "오빠하앙", tags: [] },
+            { num: 892, title: "모또모또", tags: [] }, { num: 911, title: "핫해", tags: [] },
+            { num: 921, title: "오빠나해도돼?", tags: [] }, { num: 952, title: "이꾸욧", tags: [] },
+            { num: 999, title: "비둘기", tags: [] }, 
+            { num: 1010, title: "엉큰녀", tags: [] }, 
+            { num: 1042, title: "라네트", tags: ["star"] }, { num: 1052, title: "리플도지", tags: ["star"] },
+            { num: 1111, title: "애플팡팡", tags: ["star"] }, { num: 1117, title: "최코", tags: ["star"] },
+            { num: 1212, title: "우마우마", tags: [] }, { num: 1222, title: "갱스부르르르", tags: ["star"] },
+            { num: 1234, title: "EDM", tags: [] }, { num: 1274, title: "나돌이", tags: ["star"] },
+            { num: 1313, title: "몸매", tags: [] }, { num: 1333, title: "주댕이이이", tags: ["star"] },
+            { num: 1442, title: "라네트", tags: ["star"] }, { num: 1444, title: "SAVAGE", tags: ["star"] },
+            { num: 1476, title: "정훈나나", tags: ["star"] }, { num: 1555, title: "잘자요아가씨", tags: [] },
+            { num: 1818, title: "킹받쥬", tags: [] }, { num: 1919, title: "혠타이", tags: [] },
+            { num: 2044, title: "큰라네트", tags: ["star"] }, { num: 2969, title: "몸매자랑", tags: [] },
+            { num: 3030, title: "방셀 얼굴", tags: ["bangsel"] }, 
+            { num: 5050, title: "다시보기 남기기", tags: ["etc"] },
+            { num: 5130, title: "의첸", tags: ["etc"] },
+            { num: 5555, title: "방셀 전신", tags: ["bangsel"] },
+            { num: 6620, title: "멜로디(드라군 약 1분)", tags: ["star"] }, 
+            { num: 12121, title: "랜덤시그 10곡", tags: [] },
+            { num: 13331, title: "물렁", tags: ["star"] }, { num: 14444, title: "SAVAGE", tags: ["star"] },
+            { num: 18888, title: "Prince인중", tags: ["star"] }
+        ];
+
+        let sigData = JSON.parse(localStorage.getItem('seyeonSigData')) || defaultData;
+        let filterType = 'all'; 
+        let filterValue = null;
+
+        function getSavedPasswordHash() {
+            return localStorage.getItem('seyeonAdminPwHash') || DEFAULT_HASHED_PW;
+        }
+
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                const inputPw = prompt("관리자 비밀번호를 입력하세요:");
+                if (inputPw === null) return;
+
+                const hashedInput = CryptoJS.SHA256(inputPw).toString();
+                const targetHash = getSavedPasswordHash();
+
+                if (hashedInput === targetHash) {
+                    isAdmin = true;
+                    document.getElementById('adminLoginBtn').innerText = "🔓 관리자 로그아웃";
+                    document.getElementById('changePwBtn').style.display = "inline-block";
+                    document.getElementById('adminPanel').style.display = "block";
+                    document.getElementById('thAction').style.display = "table-cell";
+                } else {
+                    alert("비밀번호가 일치하지 않습니다.");
+                }
+            } else {
+                isAdmin = false;
+                editingIndex = null;
+                document.getElementById('adminLoginBtn').innerText = "🔒 관리자 모드 로그인";
+                document.getElementById('changePwBtn').style.display = "none";
+                document.getElementById('adminPanel').style.display = "none";
+                document.getElementById('thAction').style.display = "none";
+                resetForm();
+            }
+            applyFilters();
+        }
+
+        function changeAdminPassword() {
+            if (!isAdmin) return;
+
+            const newPw = prompt("새로운 비밀번호를 입력하세요:");
+            if (newPw === null) return;
+            
+            const confirmPw = prompt("새로운 비밀번호를 한번 더 입력하세요:");
+            if (confirmPw === null) return;
+
+            if (newPw !== confirmPw) {
+                alert("입력하신 두 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.");
+                return;
+            }
+
+            if (newPw.trim() === "") {
+                alert("공백 비밀번호는 사용할 수 없습니다.");
+                return;
+            }
+
+            const newHash = CryptoJS.SHA256(newPw).toString();
+            localStorage.setItem('seyeonAdminPwHash', newHash);
+            alert("🔒 관리자 비밀번호가 성공적으로 변경되었습니다!");
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('sigTableBody');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="' + (isAdmin ? 3 : 2) + '" style="text-align:center; color:#64748b; padding: 50px 0;">검색 결과가 없습니다.</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const originIndex = sigData.findIndex(origin => origin.num === item.num && origin.title === item.title);
+                
+                // 일반 사용자 모드일 때 'hidden' 태그가 있으면 렌더링 스킵 (목록에서 숨김)
+                if (!isAdmin && item.tags && item.tags.includes('hidden')) {
+                    return;
+                }
+
+                const tr = document.createElement('tr');
+                
+                let badgeHtml = '';
+                const hasTag = item.tags && item.tags.length > 0;
+                
+                // 복수 태그 지원 대응용 분류 필터링 (hidden 태그 외의 첫 번째 시각성 태그 파악)
+                let currentTag = '';
+                if (hasTag) {
+                    currentTag = item.tags.find(t => t !== 'hidden') || '';
+                }
+                const isHidden = item.tags && item.tags.includes('hidden');
+
+                if (isHidden) {
+                    tr.classList.add('row-hidden');
+                    badgeHtml += '<span class="badge badge-hidden">숨김 목록</span>';
+                }
+
+                if (currentTag === 'hot') badgeHtml += '<span class="badge badge-hot">HOT 🔥</span>';
+                else if (currentTag === 'new') badgeHtml += '<span class="badge badge-new">NEW ✨</span>';
+                else if (currentTag === 'star') badgeHtml += '<span class="badge badge-star">열혈 ⭐</span>';
+                else if (currentTag === 'bangsel') badgeHtml += '<span class="badge badge-bangsel">방셀 📸</span>';
+                else if (currentTag === 'roulette') badgeHtml += '<span class="badge badge-roulette">룰렛 🎰</span>';
+                else if (currentTag === 'etc') badgeHtml += '<span class="badge badge-etc">기타 🎸</span>';
+
+                let numTdContent = item.num.toLocaleString();
+                let titleTdContent = `${item.title} ${badgeHtml}`;
+                let actionTd = '';
+
+                if (isAdmin) {
+                    // 현재 수정 중인 항목 레이아웃 분기
+                    if (editingIndex === originIndex) {
+                        numTdContent = `<input type="number" id="inlineEditNum" class="inline-edit-input" value="${item.num}" style="width:75px;">`;
+                        titleTdContent = `<input type="text" id="inlineEditTitle" class="inline-edit-input" value="${item.title}">`;
+                        
+                        actionTd = `
+                        <td class="action-col" style="display: table-cell; vertical-align: middle;">
+                            <div class="inline-tag-editor">
+                                <div class="tag-row" style="margin-bottom:4px;">
+                                    <button class="btn-inline-util" onclick="saveInlineEdit(${originIndex})" style="background-color:#ff409f; border-color:#ff409f; color:white;">저장</button>
+                                    <button class="btn-inline-util" onclick="cancelInlineEdit()">취소</button>
+                                </div>
+                            </div>
+                        </td>`;
+                    } else {
+                        actionTd = `
+                        <td class="action-col" style="display: table-cell;">
+                            <div class="inline-tag-editor">
+                                <div class="tag-row">
+                                    <button class="btn-inline-tag ${!currentTag ? 'active-none' : ''}" onclick="updateTagDirect(${originIndex}, '')">일반</button>
+                                    <button class="btn-inline-tag ${currentTag === 'hot' ? 'active-hot' : ''}" onclick="updateTagDirect(${originIndex}, 'hot')">HOT</button>
+                                    <button class="btn-inline-tag ${currentTag === 'new' ? 'active-new' : ''}" onclick="updateTagDirect(${originIndex}, 'new')">NEW</button>
+                                    <button class="btn-inline-tag ${currentTag === 'star' ? 'active-star' : ''}" onclick="updateTagDirect(${originIndex}, 'star')">열혈</button>
+                                </div>
+                                <div class="tag-row">
+                                    <button class="btn-inline-tag ${currentTag === 'bangsel' ? 'active-bangsel' : ''}" onclick="updateTagDirect(${originIndex}, 'bangsel')">방셀</button>
+                                    <button class="btn-inline-tag ${currentTag === 'roulette' ? 'active-roulette' : ''}" onclick="updateTagDirect(${originIndex}, 'roulette')">룰렛</button>
+                                    <button class="btn-inline-tag ${currentTag === 'etc' ? 'active-etc' : ''}" onclick="updateTagDirect(${originIndex}, 'etc')">기타</button>
+                                    <button class="btn-inline-util" onclick="startInlineEdit(${originIndex})">수정</button>
+                                    <button class="btn-inline-util btn-inline-hide ${isHidden ? 'active-hidden' : ''}" onclick="toggleHideItem(${originIndex})">${isHidden ? '해제' : '숨김'}</button>
+                                    <button class="btn-inline-util btn-inline-del" onclick="deleteSigItem(${originIndex})">삭제</button>
+                                </div>
+                            </div>
+                        </td>`;
+                    }
+                }
+
+                tr.innerHTML = `
+                    <td class="num-col" style="vertical-align: middle;">${numTdContent}</td>
+                    <td class="title-col" style="vertical-align: middle;">${titleTdContent}</td>
+                    ${actionTd}
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 원클릭 다이렉트 태그 변경 시스템 (기존 hidden 유무 판별 보존)
+        function updateTagDirect(index, newTag) {
+            const isHidden = sigData[index].tags ? sigData[index].tags.includes('hidden') : false;
+            let nextTags = [];
+            
+            if (newTag !== '') {
+                nextTags.push(newTag);
+            }
+            if (isHidden) {
+                nextTags.push('hidden');
+            }
+            
+            sigData[index].tags = nextTags;
+            saveAndRefresh();
+        }
+
+        // 인라인 수정 모드 제어 엔진
+        function startInlineEdit(index) {
+            editingIndex = index;
+            applyFilters();
+        }
+
+        function cancelInlineEdit() {
+            editingIndex = null;
+            applyFilters();
+        }
+
+        function saveInlineEdit(index) {
+            const editNum = parseInt(document.getElementById('inlineEditNum').value);
+            const editTitle = document.getElementById('inlineEditTitle').value.trim();
+
+            if (!editNum || !editTitle) {
+                alert("개수(번호)와 내용을 모두 올바르게 입력해야 수정이 완료됩니다.");
+                return;
+            }
+
+            sigData[index].num = editNum;
+            sigData[index].title = editTitle;
+            
+            editingIndex = null;
+            saveAndRefresh();
+        }
+
+        // 항목 숨김 토글 제어 엔진
+        function toggleHideItem(index) {
+            if (!sigData[index].tags) {
+                sigData[index].tags = [];
+            }
+            
+            const findIdx = sigData[index].tags.indexOf('hidden');
+            if (findIdx > -1) {
+                sigData[index].tags.splice(findIdx, 1); // 숨김 해제
+            } else {
+                sigData[index].tags.push('hidden'); // 숨김 추가
+            }
+            
+            saveAndRefresh();
+        }
+
+        function addSigItem() {
+            const numVal = parseInt(document.getElementById('formNum').value);
+            const titleVal = document.getElementById('formTitle').value.trim();
+            const tagVal = document.getElementById('formTag').value;
+
+            if (!numVal || !titleVal) {
+                alert("개수(번호)와 내용을 정확하게 입력해주세요.");
+                return;
+            }
+
+            const itemData = { num: numVal, title: titleVal, tags: tagVal ? [tagVal] : [] };
+            sigData.push(itemData);
+
+            saveAndRefresh();
+            resetForm();
+        }
+
+        function deleteSigItem(index) {
+            if (confirm(`'${sigData[index].title}' 항목을 목록에서 삭제하시겠습니까?`)) {
+                sigData.splice(index, 1);
+                if (editingIndex === index) editingIndex = null;
+                saveAndRefresh();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('formNum').value = "";
+            document.getElementById('formTitle').value = "";
+            document.getElementById('formTag').value = "";
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('seyeonSigData', JSON.stringify(sigData));
+            applyFilters();
+        }
+
+        function filterData(type, value, buttonElement) {
+            filterType = type;
+            filterValue = value;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
+            let filtered = [...sigData];
+
+            // 1. 태그 및 조건 필터링 단계
+            if (filterType === 'tag') {
+                filtered = filtered.filter(item => item.tags.includes(filterValue));
+            } else if (filterType === 'range') {
+                // 범위 검색 필터에서도 '기타(etc)' 항목은 기본적으로 제외
+                filtered = filtered.filter(item => item.num >= filterValue[0] && item.num <= filterValue[1] && !item.tags.includes('etc'));
+            } else if (filterType === 'all') {
+                // [수정] '전체' 상태일 때는 '기타(etc)' 태그가 없는 항목만 추출
+                filtered = filtered.filter(item => !item.tags.includes('etc'));
+            }
+
+            // 2. 통합 검색어 필터링 단계
+            if (searchText) {
+                // 현재 선택된 버튼이 '기타 🎸' 탭이 아니라면, 검색 결과에서도 '기타' 항목은 무조건 검색에서 노출되지 않도록 필터 추가
+                if (filterType !== 'tag' || filterValue !== 'etc') {
+                    filtered = filtered.filter(item => !item.tags.includes('etc'));
+                }
+                
+                filtered = filtered.filter(item => 
+                    item.num.toString().includes(searchText) || 
+                    item.title.toLowerCase().includes(searchText)
+                );
+            }
+
+            // 3. 정렬 및 테이블 출력
+            filtered.sort((a, b) => a.num - b.num);
+            renderTable(filtered);
+            
+            document.getElementById('thAction').style.display = isAdmin ? "table-cell" : "none";
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        applyFilters();
+    </script>
+</body>
+</html>
