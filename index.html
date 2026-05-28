@@ -398,7 +398,6 @@
                     document.getElementById('adminLoginBtn').innerText = "🔓 관리자 로그아웃";
                     document.getElementById('changePwBtn').style.display = "inline-block";
                     document.getElementById('adminPanel').style.display = "block";
-                    document.getElementById('thAction').style.display = "table-cell";
                 } else {
                     alert("비밀번호가 일치하지 않습니다.");
                 }
@@ -408,7 +407,6 @@
                 document.getElementById('adminLoginBtn').innerText = "🔒 관리자 모드 로그인";
                 document.getElementById('changePwBtn').style.display = "none";
                 document.getElementById('adminPanel').style.display = "none";
-                document.getElementById('thAction').style.display = "none";
                 resetForm();
             }
             applyFilters();
@@ -636,39 +634,36 @@
             applyFilters();
         }
 
+        // 필터 및 실시간 통합 검색 엔진 (★꼬이던 예외처리 완전 제거 버전)
         function applyFilters() {
             const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
             let filtered = [...sigData];
 
-            // 1. 태그 및 조건 필터링 단계
+            // [1단계] 탭 버튼 필터링
             if (filterType === 'tag') {
                 filtered = filtered.filter(item => item.tags.includes(filterValue));
             } else if (filterType === 'range') {
-                // 범위 검색 필터에서도 '기타(etc)' 항목은 기본적으로 제외
-                filtered = filtered.filter(item => item.num >= filterValue[0] && item.num <= filterValue[1] && !item.tags.includes('etc'));
-            } else if (filterType === 'all') {
-                // [수정] '전체' 상태일 때는 '기타(etc)' 태그가 없는 항목만 추출
-                filtered = filtered.filter(item => !item.tags.includes('etc'));
+                filtered = filtered.filter(item => item.num >= filterValue[0] && item.num <= filterValue[1]);
             }
+            // filterType === 'all' 일 때는 조건 없이 원본 데이터를 모두 사용 (기타 제외 로직 삭제)
 
-            // 2. 통합 검색어 필터링 단계
+            // [2단계] 실시간 검색어 필터링
             if (searchText) {
-                // 현재 선택된 버튼이 '기타 🎸' 탭이 아니라면, 검색 결과에서도 '기타' 항목은 무조건 검색에서 노출되지 않도록 필터 추가
-                if (filterType !== 'tag' || filterValue !== 'etc') {
-                    filtered = filtered.filter(item => !item.tags.includes('etc'));
-                }
-                
                 filtered = filtered.filter(item => 
                     item.num.toString().includes(searchText) || 
                     item.title.toLowerCase().includes(searchText)
                 );
             }
 
-            // 3. 정렬 및 테이블 출력
+            // [3단계] 정렬 및 출력
             filtered.sort((a, b) => a.num - b.num);
             renderTable(filtered);
             
-            document.getElementById('thAction').style.display = isAdmin ? "table-cell" : "none";
+            // [에러 방지] thAction 요소가 있을 때만 style 변경되도록 예외 처리
+            const thAction = document.getElementById('thAction');
+            if (thAction) {
+                thAction.style.display = isAdmin ? "table-cell" : "none";
+            }
         }
 
         document.getElementById('searchInput').addEventListener('input', applyFilters);
