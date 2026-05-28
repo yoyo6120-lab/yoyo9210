@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<html lang="ko"><head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>과즙세연 시그 목록</title>
@@ -323,13 +323,13 @@
 
     <div class="filter-section">
         <div class="filter-group" style="margin-bottom: 5px;">
-            <button class="filter-btn" data-type="all" onclick="filterData('all', null, this)">전체</button>
+            <button class="filter-btn active" data-type="all" onclick="filterData('all', null, this)">전체</button>
             <button class="filter-btn" data-type="hot" onclick="filterData('tag', 'hot', this)">HOT 🔥</button>
             <button class="filter-btn" data-type="new" onclick="filterData('tag', 'new', this)">NEW ✨</button>
             <button class="filter-btn" data-type="star" onclick="filterData('tag', 'star', this)">열혈 ⭐</button>
             <button class="filter-btn" data-type="bangsel" onclick="filterData('tag', 'bangsel', this)">방셀 📸</button>
             <button class="filter-btn" data-type="roulette" onclick="filterData('tag', 'roulette', this)">룰렛 🎰</button>
-            <button class="filter-btn active" data-type="etc" onclick="filterData('tag', 'etc', this)">기타 🎸</button>
+            <button class="filter-btn" data-type="etc" onclick="filterData('tag', 'etc', this)">기타 🎸</button>
         </div>
         <div class="filter-group">
             <button class="filter-btn" data-type="range" onclick="filterData('range', [100, 199], this)">100~199</button>
@@ -350,7 +350,9 @@
                     <th class="action-col" id="thAction" style="display: none;">원클릭 항목 관리</th>
                 </tr>
             </thead>
-            <tbody id="sigTableBody"></tbody>
+            <tbody id="sigTableBody">
+               <!-- 데이터 스크립트에 의해 자동 렌더링 됩니다. -->
+            </tbody>
         </table>
     </div>
 
@@ -360,11 +362,11 @@
         let editingIndex = null; 
 
         const defaultData = [
-            { num: 66, title: "BGM 신청곡 (가수,제목 적어서)", tags: ["etc","hidden"] },
+            { num: 66, title: "BGM 신청곡 (가수,제목 적어서)", tags: ["etc"] },
             { num: 99, title: "일반 룰렛", tags: ["roulette"] },
-            { num: 130, title: "먹먹마", tags: ["roulette","new","etc","hidden"] },
-            { num: 140, title: "먹어+1", tags: ["new","etc","hidden"] },
-            { num: 150, title: "먹지마-1", tags: ["new","etc","hidden"] },
+            { num: 130, title: "먹먹마", tags: ["roulette","new","etc"] },
+            { num: 140, title: "먹어+1", tags: ["new","etc"] },
+            { num: 150, title: "먹지마-1", tags: ["new","etc"] },
             { num: 188, title: "Overdrive", tags: [] },
             { num: 200, title: "외모체크", tags: ["hot"] },
             { num: 202, title: "너뿐이야", tags: ["hot"] },
@@ -380,7 +382,7 @@
             { num: 266, title: "뿌에뿌에", tags: [] },
             { num: 272, title: "캐치캐치", tags: ["hot","new"] },
             { num: 277, title: "카리나닮았대", tags: [] },
-            { num: 282, title: "노래 1절 부르기", tags: ["etc","hidden"] },
+            { num: 282, title: "노래 1절 부르기", tags: ["etc"] },
             { num: 298, title: "WTF", tags: [] },
             { num: 301, title: "일반 시그 룰렛", tags: ["roulette"] },
             { num: 305, title: "체온", tags: [] },
@@ -416,7 +418,7 @@
             { num: 533, title: "헤이센세", tags: ["hot"] },
             { num: 554, title: "아헤가오", tags: [] },
             { num: 555, title: "꼬마선장", tags: ["hot","new"] },
-            { num: 555, title: "노래 완곡 부르기", tags: ["etc","hidden"] },
+            { num: 555, title: "노래 완곡 부르기", tags: ["etc"] },
             { num: 557, title: "KT피리송", tags: [] },
             { num: 567, title: "퀸카", tags: [] },
             { num: 579, title: "클락션", tags: [] },
@@ -452,8 +454,8 @@
             { num: 1313, title: "몸매", tags: [] },
             { num: 1333, title: "주댕이이이", tags: ["star"] },
             { num: 1400, title: "춤 완곡!!", tags: ["hot"] },
-            { num: 1414, title: "식사식사 먹어+10", tags: ["new","etc","hidden"] },
-            { num: 1415, title: "식사시로 먹지마-10", tags: ["new","etc","hidden"] },
+            { num: 1414, title: "식사식사 먹어+10", tags: ["new","etc"] },
+            { num: 1415, title: "식사시로 먹지마-10", tags: ["new","etc"] },
             { num: 1430, title: "천사세연 응원풍 (요청시 완곡가능)", tags: ["hot"] },
             { num: 1442, title: "라네트", tags: ["star"] },
             { num: 1444, title: "SAVAGE", tags: ["star"] },
@@ -464,8 +466,8 @@
             { num: 2044, title: "큰라네트", tags: ["star"] },
             { num: 2969, title: "몸매자랑", tags: ["hot"] },
             { num: 3030, title: "얼굴 방셀", tags: ["bangsel"] },
-            { num: 5050, title: "다시보기 남기기", tags: ["etc","hidden"] },
-            { num: 5130, title: "의첸 (의상 체인지)", tags: ["etc","hidden"] },
+            { num: 5050, title: "다시보기 남기기", tags: ["etc"] },
+            { num: 5130, title: "의첸 (의상 체인지)", tags: ["etc"] },
             { num: 5555, title: "전신 방셀", tags: ["bangsel"] },
             { num: 6620, title: "멜로디(드라군 약 1분)", tags: ["star"] },
             { num: 12121, title: "랜덤시그 10곡", tags: [] },
@@ -798,6 +800,5 @@
         applyFilters();
     </script>
 
-
-</body></html>
+</body>
 </html>
