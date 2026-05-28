@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
+<html lang="ko"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>과즙세연 시그 목록</title>
@@ -50,7 +50,8 @@
             margin-bottom: 15px;
             display: flex;
             justify-content: flex-end;
-            gap: 15px;
+            align-items: center;
+            gap: 12px;
         }
         .admin-link-btn {
             background: none;
@@ -63,6 +64,22 @@
         .admin-link-btn:hover { color: #ff409f; }
         
         #changePwBtn { display: none; color: #64748b; }
+
+        /* 소스 복사 버튼 스타일 */
+        .export-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .export-btn:hover {
+            transform: scale(1.2);
+        }
 
         /* 검색창 */
         .search-container {
@@ -155,17 +172,39 @@
             overflow: hidden;
             background-color: #111116;
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         th, td { padding: 18px; }
         th { background-color: #16161f; color: #94a3b8; font-size: 14px; }
         td { border-top: 1px solid #1d1d28; font-size: 15px; vertical-align: middle; }
         tr:hover { background: rgba(255,255,255,0.02); }
 
-        /* 관리자 모드에서 숨김 처리된 행의 비주얼 피드백 */
         tr.row-hidden { opacity: 0.4; background-color: rgba(0, 0, 0, 0.3); }
 
-        .num-col { width: 90px; color: #94a3b8; font-weight: bold; }
-        .title-col { color: #f8fafc; font-weight: 500; }
+        .num-col { width: 85px; color: #94a3b8; font-weight: bold; }
+        
+        /* 💡 가로 한 줄 유지 및 스크롤/말줄임 방지용 스타일 개편 */
+        .title-col { 
+            color: #f8fafc; 
+            font-weight: 500; 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            width: 100%;
+        }
+        .title-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 1;
+        }
+        .badge-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
         .action-col { width: 340px; text-align: right; display: none; }
 
         /* 인라인 에디터 인풋 스타일 */
@@ -206,7 +245,6 @@
         }
         .btn-inline-tag:hover { border-color: #ff409f; color: white; }
         
-        /* 다이렉트 분류 선택 시 강조 효과 */
         .btn-inline-tag.active-none { background-color: #334155; color: white; border-color: #475569; }
         .btn-inline-tag.active-hot { background-color: rgba(255, 80, 80, 0.25); color: #ff5555; border-color: #ff5555; }
         .btn-inline-tag.active-new { background-color: rgba(0, 255, 255, 0.25); color: #00f7ff; border-color: #00f7ff; }
@@ -215,7 +253,6 @@
         .btn-inline-tag.active-roulette { background-color: rgba(0, 229, 117, 0.25); color: #00ff84; border-color: #00ff84; }
         .btn-inline-tag.active-etc { background-color: rgba(77, 166, 255, 0.25); color: #66b2ff; border-color: #66b2ff; }
 
-        /* 기능성 버튼 제어 스타일 (수정/삭제/숨김) */
         .btn-inline-util {
             background-color: #27273a;
             border: 1px solid #475569;
@@ -236,7 +273,7 @@
         .btn-inline-del:hover { background-color: #ef4444; color: white; }
 
         /* 태그 배지 */
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; vertical-align: middle; }
         .badge-hot { background-color: rgba(255, 80, 80, 0.15); color: #ff5555; }
         .badge-new { background-color: rgba(0, 255, 255, 0.15); color: #00f7ff; }
         .badge-star { background-color: rgba(255, 215, 0, 0.15); color: gold; }
@@ -249,7 +286,8 @@
 <body>
 
     <div class="admin-status-bar">
-        <button id="changePwBtn" class="admin-link-btn" onclick="changeAdminPassword()">🔑 비밀번호 변경</button>
+        <button id="exportCodeBtn" class="export-btn" onclick="exportUpdatedHtmlSource()" title="최종 소스코드 클립보드 복사">📋</button>
+        <button id="changePwBtn" class="admin-link-btn" onclick="changeAdminPassword()" style="display: none;">🔑 비밀번호 변경</button>
         <button id="adminLoginBtn" class="admin-link-btn" onclick="toggleAdminMode()">🔒 관리자 모드 로그인</button>
     </div>
 
@@ -260,7 +298,7 @@
     <div id="adminPanel" class="admin-panel">
         <h3>✨ 시그 및 항목 신규 추가</h3>
         <div class="form-group">
-            <input type="number" id="formNum" class="form-input" style="width: 100px;" placeholder="개수(번호)">
+            <input type="number" id="formNum" class="form-input" style="width: 100px;" placeholder="개수">
             <input type="text" id="formTitle" class="form-input" style="flex-grow: 1;" placeholder="내용 및 제목을 입력하세요">
             <select id="formTag" class="form-input">
                 <option value="">일반 분류</option>
@@ -276,7 +314,7 @@
     </div>
 
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="번호 또는 제목 검색">
+        <input type="text" id="searchInput" class="search-input" placeholder="개수 또는 제목 검색">
     </div>
 
     <div class="filter-section">
@@ -303,77 +341,1140 @@
         <table>
             <thead>
                 <tr>
-                    <th class="num-col">개수(번호)</th>
+                    <th class="num-col">개수</th>
                     <th>내용</th>
-                    <th class="action-col" id="thAction">원클릭 항목 관리</th>
+                    <th class="action-col" id="thAction" style="display: none;">원클릭 항목 관리</th>
                 </tr>
             </thead>
-            <tbody id="sigTableBody"></tbody>
+            <tbody id="sigTableBody"><tr>
+                    <td class="num-col" style="vertical-align: middle;">66</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">BGM 신청곡 (가수,제목 적어서)</span>
+                        <div class="badge-container"><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">99</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">일반 룰렛</span>
+                        <div class="badge-container"><span class="badge badge-roulette">룰렛 🎰</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">130</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">먹먹마</span>
+                        <div class="badge-container"><span class="badge badge-roulette">룰렛 🎰</span><span class="badge badge-new">NEW ✨</span><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">140</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">먹어+1</span>
+                        <div class="badge-container"><span class="badge badge-new">NEW ✨</span><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">150</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">먹지마-1</span>
+                        <div class="badge-container"><span class="badge badge-new">NEW ✨</span><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">188</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">Overdrive</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">200</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">외모체크</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">202</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">너뿐이야</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">222</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">포켓몬댄스</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">224</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">힙사사돈</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">227</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">삐삐송</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">234</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">FLI:P</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">244</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">삐끼삐끼</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">245</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">미야오</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">252</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">언터쳐블</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">257</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">모찌송</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">262</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">부리부리</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">266</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">뿌에뿌에</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">272</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">캐치캐치</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">277</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">카리나닮았대</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">282</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">노래 1절 부르기</span>
+                        <div class="badge-container"><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">298</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">WTF</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">301</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">일반 시그 룰렛</span>
+                        <div class="badge-container"><span class="badge badge-roulette">룰렛 🎰</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">305</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">체온</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">312</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">날라리</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">313</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">루머</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">325</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">홀드업</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">332</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">bass down low</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">333</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">킥드럼베이스</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">341</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">라라리라라</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">345</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">버블</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">357</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">이머전시</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">365</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">트월킹덕</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">369</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">버터플라이</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">416</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">KEEP IT SEXY</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">423</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">인더클럽</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">424</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">귀여워</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">434</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">핑크레이디</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">444</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">슈퍼스타 (우유)</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">449</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">계엄령</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">456</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">간바레센빠이</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">468</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">스티키</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">472</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">마티니</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">474</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">룩앳미</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">477</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">위플래쉬</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">480</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">ㅃ킹뱅어</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">497</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">스마트</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">499</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">터미널</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">501</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">섹시 시그 룰렛</span>
+                        <div class="badge-container"><span class="badge badge-roulette">룰렛 🎰</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">503</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">수정테스트34</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">524</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">라잌유베러</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">530</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">쥬시위글</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">531</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">롯데삼진송</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">533</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">헤이센세</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">554</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">아헤가오</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">555</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">꼬마선장</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span><span class="badge badge-new">NEW ✨</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">555</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">노래 완곡 부르기</span>
+                        <div class="badge-container"><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">557</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">KT피리송</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">567</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">퀸카</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">579</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">클락션</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">593</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">과즙세연 어셈블</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">599</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">앙카존</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">626</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">마그네틱</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">656</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">패스트카</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">662</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">드라군</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">662</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">씨띵 666</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">697</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">야메떼</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">702</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">제로투 (욕로투) 이벤트</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">717</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">궁예</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">747</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">슬램덩크</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">788</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">테디베어</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">797</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">오니짱</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">857</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">바우치</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">858</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">오빠달려붕붕</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">888</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">오빠하앙</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">892</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">모또모또</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">911</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">핫해</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">921</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">오빠나해도돼?</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">952</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">이꾸욧</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">999</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">비둘기</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,010</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">엉큰녀</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,042</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">라네트</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,052</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">리플도지</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,111</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">애플팡팡</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,117</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">최코</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,212</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">우마우마</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,222</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">갱스부르르르</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,234</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">EDM (이디엠)</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,274</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">나돌이</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,313</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">몸매</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,333</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">주댕이이이</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,400</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">춤 완곡!!</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,414</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">식사식사 먹어+10</span>
+                        <div class="badge-container"><span class="badge badge-new">NEW ✨</span><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,415</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">식사시로 먹지마-10</span>
+                        <div class="badge-container"><span class="badge badge-new">NEW ✨</span><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,430</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">천사세연 응원풍 (요청시 완곡가능)</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,442</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">라네트</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,444</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">SAVAGE</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,476</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">정훈나나</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,555</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">잘자요아가씨</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,818</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">킹받쥬</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">1,919</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">혠타이</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">2,044</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">큰라네트</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">2,969</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">몸매자랑</span>
+                        <div class="badge-container"><span class="badge badge-hot">HOT 🔥</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">3,030</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">얼굴 방셀</span>
+                        <div class="badge-container"><span class="badge badge-bangsel">방셀 📸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">5,050</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">다시보기 남기기</span>
+                        <div class="badge-container"><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">5,130</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">의첸 (의상 체인지)</span>
+                        <div class="badge-container"><span class="badge badge-etc">기타 🎸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">5,555</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">전신 방셀</span>
+                        <div class="badge-container"><span class="badge badge-bangsel">방셀 📸</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">6,620</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">멜로디(드라군 약 1분)</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">12,121</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">랜덤시그 10곡</span>
+                        
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">13,331</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">물렁</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">14,444</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">SAVAGE</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr><tr>
+                    <td class="num-col" style="vertical-align: middle;">18,888</td>
+                    <td style="vertical-align: middle;">
+                    <div class="title-col">
+                        <span class="title-text">Prince인중</span>
+                        <div class="badge-container"><span class="badge badge-star">열혈 ⭐</span></div>
+                    </div>
+                </td>
+                    
+                </tr></tbody>
         </table>
     </div>
 
     <script>
         const DEFAULT_HASHED_PW = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
         let isAdmin = false;
-        let editingIndex = null; // 현재 인라인 수정 중인 원본 항목 인덱스 관리
+        let editingIndex = null; 
 
         const defaultData = [
-            { num: 66, title: "신청곡 (가수명과 제목을 적어서)", tags: ["etc"] },
+            { num: 66, title: "BGM 신청곡 (가수,제목 적어서)", tags: ["etc"] },
             { num: 99, title: "일반 룰렛", tags: ["roulette"] },
-            { num: 188, title: "Overdrive", tags: [] }, { num: 200, title: "외모체크", tags: ["hot"] }, 
-            { num: 202, title: "너뿐이야", tags: [] }, { num: 222, title: "포켓몬댄스", tags: [] },
-            { num: 224, title: "힙사사돈", tags: [] }, { num: 227, title: "삐삐송", tags: [] },
-            { num: 234, title: "FLI:P", tags: [] }, { num: 244, title: "삐끼삐끼", tags: ["hot"] },
-            { num: 245, title: "미야오", tags: ["new"] }, { num: 252, title: "언터쳐블", tags: [] },
-            { num: 257, title: "모찌송", tags: [] }, { num: 262, title: "부리부리", tags: [] },
-            { num: 266, title: "뿌에뿌에", tags: [] }, { num: 272, title: "캐치캐치", tags: [] },
-            { num: 277, title: "카리나닮았대", tags: [] }, { num: 282, title: "노래 1절", tags: ["etc"] },
-            { num: 298, title: "WTF", tags: [] }, { num: 301, title: "일반 시그 랜덤 룰렛", tags: ["roulette"] },
-            { num: 305, title: "체온", tags: [] }, { num: 312, title: "날라리", tags: [] },
-            { num: 313, title: "루머", tags: [] }, { num: 325, title: "홀드업", tags: [] },
-            { num: 332, title: "bass down low", tags: [] }, { num: 333, title: "킥드럼베이스", tags: [] },
-            { num: 341, title: "라라리라라", tags: [] }, { num: 345, title: "버블", tags: [] },
-            { num: 357, title: "이머전시", tags: [] }, { num: 365, title: "트월킹덕", tags: [] },
-            { num: 369, title: "버터플라이", tags: [] }, { num: 416, title: "KEEP IT SEXY", tags: [] },
-            { num: 423, title: "인더클럽", tags: [] }, { num: 424, title: "귀여워", tags: [] },
-            { num: 434, title: "핑크레이디", tags: [] }, { num: 444, title: "슈퍼스타", tags: [] },
-            { num: 449, title: "계엄령", tags: [] }, { num: 456, title: "간바레센빠이", tags: [] },
-            { num: 468, title: "스티키", tags: ["hot"] }, { num: 472, title: "마티니", tags: [] },
-            { num: 474, title: "룩앳미", tags: [] }, { num: 477, title: "위플래쉬", tags: ["new"] },
-            { num: 480, title: "ㅃ킹뱅어", tags: [] }, { num: 497, title: "스마트", tags: [] },
-            { num: 499, title: "터미널", tags: [] }, { num: 501, title: "섹시 시그 랜덤 룰렛", tags: ["roulette"] },
-            { num: 524, title: "라잌유베러", tags: [] }, { num: 530, title: "쥬시위글", tags: [] },
-            { num: 531, title: "롯데삼진송", tags: [] }, { num: 533, title: "헤이센세", tags: [] },
-            { num: 554, title: "아헤가오", tags: [] }, { num: 555, title: "꼬마선장 / 노래 완곡", tags: ["etc"] },
-            { num: 557, title: "KT피리송", tags: [] }, { num: 567, title: "퀸카", tags: [] },
-            { num: 579, title: "클락션", tags: [] }, { num: 593, title: "과즙세연 어셈블", tags: ["hot"] },
-            { num: 599, title: "앙카존", tags: [] }, { num: 626, title: "마그네틱", tags: [] },
-            { num: 656, title: "패스트카", tags: [] }, { num: 662, title: "드라군", tags: [] },
-            { num: 662, title: "씨띵 666", tags: [] }, { num: 697, title: "야메떼", tags: [] },
-            { num: 702, title: "제로투 (욕로투) 이벤트", tags: [] }, { num: 717, title: "궁예", tags: [] },
-            { num: 747, title: "슬램덩크", tags: [] }, { num: 788, title: "테디베어", tags: [] },
-            { num: 797, title: "오니짱", tags: [] }, { num: 857, title: "바우치", tags: [] },
-            { num: 858, title: "오빠달려붕붕", tags: [] }, { num: 888, title: "오빠하앙", tags: [] },
-            { num: 892, title: "모또모또", tags: [] }, { num: 911, title: "핫해", tags: [] },
-            { num: 921, title: "오빠나해도돼?", tags: [] }, { num: 952, title: "이꾸욧", tags: [] },
-            { num: 999, title: "비둘기", tags: [] }, 
-            { num: 1010, title: "엉큰녀", tags: [] }, 
-            { num: 1042, title: "라네트", tags: ["star"] }, { num: 1052, title: "리플도지", tags: ["star"] },
-            { num: 1111, title: "애플팡팡", tags: ["star"] }, { num: 1117, title: "최코", tags: ["star"] },
-            { num: 1212, title: "우마우마", tags: [] }, { num: 1222, title: "갱스부르르르", tags: ["star"] },
-            { num: 1234, title: "EDM", tags: [] }, { num: 1274, title: "나돌이", tags: ["star"] },
-            { num: 1313, title: "몸매", tags: [] }, { num: 1333, title: "주댕이이이", tags: ["star"] },
-            { num: 1442, title: "라네트", tags: ["star"] }, { num: 1444, title: "SAVAGE", tags: ["star"] },
-            { num: 1476, title: "정훈나나", tags: ["star"] }, { num: 1555, title: "잘자요아가씨", tags: [] },
-            { num: 1818, title: "킹받쥬", tags: [] }, { num: 1919, title: "혠타이", tags: [] },
-            { num: 2044, title: "큰라네트", tags: ["star"] }, { num: 2969, title: "몸매자랑", tags: [] },
-            { num: 3030, title: "방셀 얼굴", tags: ["bangsel"] }, 
+            { num: 130, title: "먹먹마", tags: ["roulette","new","etc"] },
+            { num: 140, title: "먹어+1", tags: ["new","etc"] },
+            { num: 150, title: "먹지마-1", tags: ["new","etc"] },
+            { num: 188, title: "Overdrive", tags: [] },
+            { num: 200, title: "외모체크", tags: ["hot"] },
+            { num: 202, title: "너뿐이야", tags: ["hot"] },
+            { num: 222, title: "포켓몬댄스", tags: [] },
+            { num: 224, title: "힙사사돈", tags: [] },
+            { num: 227, title: "삐삐송", tags: [] },
+            { num: 234, title: "FLI:P", tags: [] },
+            { num: 244, title: "삐끼삐끼", tags: [] },
+            { num: 245, title: "미야오", tags: [] },
+            { num: 252, title: "언터쳐블", tags: [] },
+            { num: 257, title: "모찌송", tags: ["hot","new"] },
+            { num: 262, title: "부리부리", tags: [] },
+            { num: 266, title: "뿌에뿌에", tags: [] },
+            { num: 272, title: "캐치캐치", tags: ["hot","new"] },
+            { num: 277, title: "카리나닮았대", tags: [] },
+            { num: 282, title: "노래 1절 부르기", tags: ["etc"] },
+            { num: 298, title: "WTF", tags: [] },
+            { num: 301, title: "일반 시그 룰렛", tags: ["roulette"] },
+            { num: 305, title: "체온", tags: [] },
+            { num: 312, title: "날라리", tags: [] },
+            { num: 313, title: "루머", tags: [] },
+            { num: 325, title: "홀드업", tags: [] },
+            { num: 332, title: "bass down low", tags: ["hot"] },
+            { num: 333, title: "킥드럼베이스", tags: [] },
+            { num: 341, title: "라라리라라", tags: [] },
+            { num: 345, title: "버블", tags: [] },
+            { num: 357, title: "이머전시", tags: [] },
+            { num: 365, title: "트월킹덕", tags: ["hot","new"] },
+            { num: 369, title: "버터플라이", tags: [] },
+            { num: 416, title: "KEEP IT SEXY", tags: ["hot","new"] },
+            { num: 423, title: "인더클럽", tags: [] },
+            { num: 424, title: "귀여워", tags: ["hot","new"] },
+            { num: 434, title: "핑크레이디", tags: [] },
+            { num: 444, title: "슈퍼스타 (우유)", tags: ["hot"] },
+            { num: 449, title: "계엄령", tags: ["hot"] },
+            { num: 456, title: "간바레센빠이", tags: ["hot"] },
+            { num: 468, title: "스티키", tags: [] },
+            { num: 472, title: "마티니", tags: [] },
+            { num: 474, title: "룩앳미", tags: [] },
+            { num: 477, title: "위플래쉬", tags: [] },
+            { num: 480, title: "ㅃ킹뱅어", tags: [] },
+            { num: 497, title: "스마트", tags: [] },
+            { num: 499, title: "터미널", tags: [] },
+            { num: 501, title: "섹시 시그 룰렛", tags: ["roulette"] },
+            { num: 503, title: "수정테스트34", tags: [] },
+            { num: 524, title: "라잌유베러", tags: [] },
+            { num: 530, title: "쥬시위글", tags: [] },
+            { num: 531, title: "롯데삼진송", tags: [] },
+            { num: 533, title: "헤이센세", tags: ["hot"] },
+            { num: 554, title: "아헤가오", tags: [] },
+            { num: 555, title: "꼬마선장", tags: ["hot","new"] },
+            { num: 555, title: "노래 완곡 부르기", tags: ["etc"] },
+            { num: 557, title: "KT피리송", tags: [] },
+            { num: 567, title: "퀸카", tags: [] },
+            { num: 579, title: "클락션", tags: [] },
+            { num: 593, title: "과즙세연 어셈블", tags: [] },
+            { num: 599, title: "앙카존", tags: [] },
+            { num: 626, title: "마그네틱", tags: [] },
+            { num: 656, title: "패스트카", tags: [] },
+            { num: 662, title: "드라군", tags: [] },
+            { num: 662, title: "씨띵 666", tags: [] },
+            { num: 697, title: "야메떼", tags: [] },
+            { num: 702, title: "제로투 (욕로투) 이벤트", tags: [] },
+            { num: 717, title: "궁예", tags: [] },
+            { num: 747, title: "슬램덩크", tags: [] },
+            { num: 788, title: "테디베어", tags: [] },
+            { num: 797, title: "오니짱", tags: [] },
+            { num: 857, title: "바우치", tags: ["hot"] },
+            { num: 858, title: "오빠달려붕붕", tags: [] },
+            { num: 888, title: "오빠하앙", tags: ["hot"] },
+            { num: 892, title: "모또모또", tags: ["hot"] },
+            { num: 911, title: "핫해", tags: [] },
+            { num: 921, title: "오빠나해도돼?", tags: ["hot"] },
+            { num: 952, title: "이꾸욧", tags: [] },
+            { num: 999, title: "비둘기", tags: [] },
+            { num: 1010, title: "엉큰녀", tags: [] },
+            { num: 1042, title: "라네트", tags: ["star"] },
+            { num: 1052, title: "리플도지", tags: ["star"] },
+            { num: 1111, title: "애플팡팡", tags: ["star"] },
+            { num: 1117, title: "최코", tags: ["star"] },
+            { num: 1212, title: "우마우마", tags: [] },
+            { num: 1222, title: "갱스부르르르", tags: ["star"] },
+            { num: 1234, title: "EDM (이디엠)", tags: ["hot"] },
+            { num: 1274, title: "나돌이", tags: ["star"] },
+            { num: 1313, title: "몸매", tags: [] },
+            { num: 1333, title: "주댕이이이", tags: ["star"] },
+            { num: 1400, title: "춤 완곡!!", tags: ["hot"] },
+            { num: 1414, title: "식사식사 먹어+10", tags: ["new","etc"] },
+            { num: 1415, title: "식사시로 먹지마-10", tags: ["new","etc"] },
+            { num: 1430, title: "천사세연 응원풍 (요청시 완곡가능)", tags: ["hot"] },
+            { num: 1442, title: "라네트", tags: ["star"] },
+            { num: 1444, title: "SAVAGE", tags: ["star"] },
+            { num: 1476, title: "정훈나나", tags: ["star"] },
+            { num: 1555, title: "잘자요아가씨", tags: [] },
+            { num: 1818, title: "킹받쥬", tags: [] },
+            { num: 1919, title: "혠타이", tags: ["hot"] },
+            { num: 2044, title: "큰라네트", tags: ["star"] },
+            { num: 2969, title: "몸매자랑", tags: ["hot"] },
+            { num: 3030, title: "얼굴 방셀", tags: ["bangsel"] },
             { num: 5050, title: "다시보기 남기기", tags: ["etc"] },
-            { num: 5130, title: "의첸", tags: ["etc"] },
-            { num: 5555, title: "방셀 전신", tags: ["bangsel"] },
-            { num: 6620, title: "멜로디(드라군 약 1분)", tags: ["star"] }, 
+            { num: 5130, title: "의첸 (의상 체인지)", tags: ["etc"] },
+            { num: 5555, title: "전신 방셀", tags: ["bangsel"] },
+            { num: 6620, title: "멜로디(드라군 약 1분)", tags: ["star"] },
             { num: 12121, title: "랜덤시그 10곡", tags: [] },
-            { num: 13331, title: "물렁", tags: ["star"] }, { num: 14444, title: "SAVAGE", tags: ["star"] },
+            { num: 13331, title: "물렁", tags: ["star"] },
+            { num: 14444, title: "SAVAGE", tags: ["star"] },
             { num: 18888, title: "Prince인중", tags: ["star"] }
         ];
 
@@ -395,7 +1496,7 @@
 
                 if (hashedInput === targetHash) {
                     isAdmin = true;
-                    document.getElementById('adminLoginBtn').innerText = "🔓 관리자 로그아웃";
+                    document.getElementById('adminLoginBtn').innerText = "🔒 관리자 모드 로그인";
                     document.getElementById('changePwBtn').style.display = "inline-block";
                     document.getElementById('adminPanel').style.display = "block";
                 } else {
@@ -445,44 +1546,48 @@
                 return;
             }
 
-            data.forEach(item => {
-                const originIndex = sigData.findIndex(origin => origin.num === item.num && origin.title === item.title);
+            data.forEach((item, loopIdx) => {
+                const originIndex = sigData.findIndex((origin, origIdx) => origIdx === item._originalIdx);
+                if (originIndex === -1) return;
                 
-                // 일반 사용자 모드일 때 'hidden' 태그가 있으면 렌더링 스킵 (목록에서 숨김)
                 if (!isAdmin && item.tags && item.tags.includes('hidden')) {
                     return;
                 }
 
                 const tr = document.createElement('tr');
-                
-                let badgeHtml = '';
-                const hasTag = item.tags && item.tags.length > 0;
-                
-                // 복수 태그 지원 대응용 분류 필터링 (hidden 태그 외의 첫 번째 시각성 태그 파악)
-                let currentTag = '';
-                if (hasTag) {
-                    currentTag = item.tags.find(t => t !== 'hidden') || '';
-                }
-                const isHidden = item.tags && item.tags.includes('hidden');
+                const itemTags = item.tags || [];
+                const isHidden = itemTags.includes('hidden');
 
                 if (isHidden) {
                     tr.classList.add('row-hidden');
-                    badgeHtml += '<span class="badge badge-hidden">숨김 목록</span>';
                 }
 
-                if (currentTag === 'hot') badgeHtml += '<span class="badge badge-hot">HOT 🔥</span>';
-                else if (currentTag === 'new') badgeHtml += '<span class="badge badge-new">NEW ✨</span>';
-                else if (currentTag === 'star') badgeHtml += '<span class="badge badge-star">열혈 ⭐</span>';
-                else if (currentTag === 'bangsel') badgeHtml += '<span class="badge badge-bangsel">방셀 📸</span>';
-                else if (currentTag === 'roulette') badgeHtml += '<span class="badge badge-roulette">룰렛 🎰</span>';
-                else if (currentTag === 'etc') badgeHtml += '<span class="badge badge-etc">기타 🎸</span>';
+                // 💡 여러 개의 배지를 가로로 한 바구니에 담기 위한 루프 처리
+                let badgeInnerHtml = '';
+                if (isHidden) {
+                    badgeInnerHtml += '<span class="badge badge-hidden">숨김 목록</span>';
+                }
+                itemTags.forEach(tag => {
+                    if (tag === 'hot') badgeInnerHtml += '<span class="badge badge-hot">HOT 🔥</span>';
+                    else if (tag === 'new') badgeInnerHtml += '<span class="badge badge-new">NEW ✨</span>';
+                    else if (tag === 'star') badgeInnerHtml += '<span class="badge badge-star">열혈 ⭐</span>';
+                    else if (tag === 'bangsel') badgeInnerHtml += '<span class="badge badge-bangsel">방셀 📸</span>';
+                    else if (tag === 'roulette') badgeInnerHtml += '<span class="badge badge-roulette">룰렛 🎰</span>';
+                    else if (tag === 'etc') badgeInnerHtml += '<span class="badge badge-etc">기타 🎸</span>';
+                });
 
                 let numTdContent = item.num.toLocaleString();
-                let titleTdContent = `${item.title} ${badgeHtml}`;
+                
+                // 💡 제목은 유동적으로 줄어들고, 배지 묶음(badge-container)은 절대 깨지지 않고 가로 배치되도록 구조화
+                let titleTdContent = `
+                    <div class="title-col">
+                        <span class="title-text">${item.title}</span>
+                        ${badgeInnerHtml ? `<div class="badge-container">${badgeInnerHtml}</div>` : ''}
+                    </div>
+                `;
                 let actionTd = '';
 
                 if (isAdmin) {
-                    // 현재 수정 중인 항목 레이아웃 분기
                     if (editingIndex === originIndex) {
                         numTdContent = `<input type="number" id="inlineEditNum" class="inline-edit-input" value="${item.num}" style="width:75px;">`;
                         titleTdContent = `<input type="text" id="inlineEditTitle" class="inline-edit-input" value="${item.title}">`;
@@ -501,15 +1606,15 @@
                         <td class="action-col" style="display: table-cell;">
                             <div class="inline-tag-editor">
                                 <div class="tag-row">
-                                    <button class="btn-inline-tag ${!currentTag ? 'active-none' : ''}" onclick="updateTagDirect(${originIndex}, '')">일반</button>
-                                    <button class="btn-inline-tag ${currentTag === 'hot' ? 'active-hot' : ''}" onclick="updateTagDirect(${originIndex}, 'hot')">HOT</button>
-                                    <button class="btn-inline-tag ${currentTag === 'new' ? 'active-new' : ''}" onclick="updateTagDirect(${originIndex}, 'new')">NEW</button>
-                                    <button class="btn-inline-tag ${currentTag === 'star' ? 'active-star' : ''}" onclick="updateTagDirect(${originIndex}, 'star')">열혈</button>
+                                    <button class="btn-inline-tag ${itemTags.length === 0 || (itemTags.length === 1 && isHidden) ? 'active-none' : ''}" onclick="resetTagsDirect(${originIndex})">일반</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('hot') ? 'active-hot' : ''}" onclick="toggleTagDirect(${originIndex}, 'hot')">HOT</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('new') ? 'active-new' : ''}" onclick="toggleTagDirect(${originIndex}, 'new')">NEW</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('star') ? 'active-star' : ''}" onclick="toggleTagDirect(${originIndex}, 'star')">열혈</button>
                                 </div>
                                 <div class="tag-row">
-                                    <button class="btn-inline-tag ${currentTag === 'bangsel' ? 'active-bangsel' : ''}" onclick="updateTagDirect(${originIndex}, 'bangsel')">방셀</button>
-                                    <button class="btn-inline-tag ${currentTag === 'roulette' ? 'active-roulette' : ''}" onclick="updateTagDirect(${originIndex}, 'roulette')">룰렛</button>
-                                    <button class="btn-inline-tag ${currentTag === 'etc' ? 'active-etc' : ''}" onclick="updateTagDirect(${originIndex}, 'etc')">기타</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('bangsel') ? 'active-bangsel' : ''}" onclick="toggleTagDirect(${originIndex}, 'bangsel')">방셀</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('roulette') ? 'active-roulette' : ''}" onclick="toggleTagDirect(${originIndex}, 'roulette')">룰렛</button>
+                                    <button class="btn-inline-tag ${itemTags.includes('etc') ? 'active-etc' : ''}" onclick="toggleTagDirect(${originIndex}, 'etc')">기타</button>
                                     <button class="btn-inline-util" onclick="startInlineEdit(${originIndex})">수정</button>
                                     <button class="btn-inline-util btn-inline-hide ${isHidden ? 'active-hidden' : ''}" onclick="toggleHideItem(${originIndex})">${isHidden ? '해제' : '숨김'}</button>
                                     <button class="btn-inline-util btn-inline-del" onclick="deleteSigItem(${originIndex})">삭제</button>
@@ -521,30 +1626,34 @@
 
                 tr.innerHTML = `
                     <td class="num-col" style="vertical-align: middle;">${numTdContent}</td>
-                    <td class="title-col" style="vertical-align: middle;">${titleTdContent}</td>
+                    <td style="vertical-align: middle;">${titleTdContent}</td>
                     ${actionTd}
                 `;
                 tableBody.appendChild(tr);
             });
         }
 
-        // 원클릭 다이렉트 태그 변경 시스템 (기존 hidden 유무 판별 보존)
-        function updateTagDirect(index, newTag) {
-            const isHidden = sigData[index].tags ? sigData[index].tags.includes('hidden') : false;
-            let nextTags = [];
-            
-            if (newTag !== '') {
-                nextTags.push(newTag);
-            }
-            if (isHidden) {
-                nextTags.push('hidden');
+        // 💡 기존 단일 태그 교체 함수를 여러 개 멀티 선택/해제(토글) 방식으로 업그레이드
+        function toggleTagDirect(index, targetTag) {
+            if (!sigData[index].tags) {
+                sigData[index].tags = [];
             }
             
-            sigData[index].tags = nextTags;
+            const tagIdx = sigData[index].tags.indexOf(targetTag);
+            if (tagIdx > -1) {
+                sigData[index].tags.splice(tagIdx, 1); // 이미 있으면 제거
+            } else {
+                sigData[index].tags.push(targetTag);   // 없으면 누적 추가
+            }
             saveAndRefresh();
         }
 
-        // 인라인 수정 모드 제어 엔진
+        function resetTagsDirect(index) {
+            const isHidden = sigData[index].tags ? sigData[index].tags.includes('hidden') : false;
+            sigData[index].tags = isHidden ? ['hidden'] : [];
+            saveAndRefresh();
+        }
+
         function startInlineEdit(index) {
             editingIndex = index;
             applyFilters();
@@ -560,7 +1669,7 @@
             const editTitle = document.getElementById('inlineEditTitle').value.trim();
 
             if (!editNum || !editTitle) {
-                alert("개수(번호)와 내용을 모두 올바르게 입력해야 수정이 완료됩니다.");
+                alert("개수와 내용을 모두 올바르게 입력해야 수정이 완료됩니다.");
                 return;
             }
 
@@ -571,7 +1680,6 @@
             saveAndRefresh();
         }
 
-        // 항목 숨김 토글 제어 엔진
         function toggleHideItem(index) {
             if (!sigData[index].tags) {
                 sigData[index].tags = [];
@@ -579,9 +1687,9 @@
             
             const findIdx = sigData[index].tags.indexOf('hidden');
             if (findIdx > -1) {
-                sigData[index].tags.splice(findIdx, 1); // 숨김 해제
+                sigData[index].tags.splice(findIdx, 1); 
             } else {
-                sigData[index].tags.push('hidden'); // 숨김 추가
+                sigData[index].tags.push('hidden'); 
             }
             
             saveAndRefresh();
@@ -593,7 +1701,7 @@
             const tagVal = document.getElementById('formTag').value;
 
             if (!numVal || !titleVal) {
-                alert("개수(번호)와 내용을 정확하게 입력해주세요.");
+                alert("개수와 내용을 정확하게 입력해주세요.");
                 return;
             }
 
@@ -634,20 +1742,17 @@
             applyFilters();
         }
 
-        // 필터 및 실시간 통합 검색 엔진 (★꼬이던 예외처리 완전 제거 버전)
         function applyFilters() {
             const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
-            let filtered = [...sigData];
+            
+            let filtered = sigData.map((item, idx) => ({...item, _originalIdx: idx}));
 
-            // [1단계] 탭 버튼 필터링
             if (filterType === 'tag') {
-                filtered = filtered.filter(item => item.tags.includes(filterValue));
+                filtered = filtered.filter(item => item.tags && item.tags.includes(filterValue));
             } else if (filterType === 'range') {
                 filtered = filtered.filter(item => item.num >= filterValue[0] && item.num <= filterValue[1]);
             }
-            // filterType === 'all' 일 때는 조건 없이 원본 데이터를 모두 사용 (기타 제외 로직 삭제)
 
-            // [2단계] 실시간 검색어 필터링
             if (searchText) {
                 filtered = filtered.filter(item => 
                     item.num.toString().includes(searchText) || 
@@ -655,19 +1760,50 @@
                 );
             }
 
-            // [3단계] 정렬 및 출력
             filtered.sort((a, b) => a.num - b.num);
             renderTable(filtered);
             
-            // [에러 방지] thAction 요소가 있을 때만 style 변경되도록 예외 처리
             const thAction = document.getElementById('thAction');
             if (thAction) {
                 thAction.style.display = isAdmin ? "table-cell" : "none";
             }
         }
 
+        function exportUpdatedHtmlSource() {
+            const inputPw = prompt("소스코드를 추출하려면 관리자 비밀번호를 입력하세요:");
+            if (inputPw === null) return;
+
+            const hashedInput = CryptoJS.SHA256(inputPw).toString();
+            const targetHash = getSavedPasswordHash();
+
+            if (hashedInput !== targetHash) {
+                alert("비밀번호가 일치하지 않습니다.");
+                return;
+            }
+
+            const sortedData = [...sigData].sort((a, b) => a.num - b.num);
+            const wholeDocumentString = document.documentElement.outerHTML;
+            const regex = /(const\s+defaultData\s*=\s*\[)[\s\S]*?(\];)/;
+            const formattedDataJson = "\n" + sortedData.map(item => `            { num: ${item.num}, title: "${item.title}", tags: ${JSON.stringify(item.tags)} }`).join(",\n") + "\n        ";
+            
+            let updatedSource = "<!DOCTYPE html>\n<html lang=\"ko\">\n" + wholeDocumentString + "\n</html>";
+            
+            updatedSource = updatedSource.replace(/<div id="adminPanel" class="admin-panel" style="display:\s*(block|none);?">/g, '<div id="adminPanel" class="admin-panel">');
+            updatedSource = updatedSource.replace(/<button id="changePwBtn" class="admin-link-btn" style="display:\s*(inline-block|none);?">/g, '<button id="changePwBtn" class="admin-link-btn">');
+            updatedSource = updatedSource.replace(/🔒 관리자 모드 로그인|🔒 관리자 모드 로그인/g, '🔒 관리자 모드 로그인');
+            
+            updatedSource = updatedSource.replace(regex, `$1${formattedDataJson}$2`);
+
+            navigator.clipboard.writeText(updatedSource).then(() => {
+                alert("📋 현재까지 수정된 전체 소스코드가 클립보드에 성공적으로 복사되었습니다!\n\n이 상태에서 기존 메모장이나 index.html 파일을 열어 전체 선택(Ctrl+A) 후 붙여넣기(Ctrl+V) 하시면 영구 저장됩니다.");
+            }).catch(err => {
+                alert("클립보드 복사 중 오류가 발생했습니다. 브라우저 보안 권한을 확인해주세요.");
+            });
+        }
+
         document.getElementById('searchInput').addEventListener('input', applyFilters);
         applyFilters();
     </script>
-</body>
+
+</body></html>
 </html>
