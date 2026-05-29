@@ -965,6 +965,25 @@
         }
 
         function exportUpdatedHtmlSource() {
+            // [복구 완료] 로그인 상태가 아닐 때 📋 버튼을 누르면 비밀번호 확인 창을 띄웁니다.
+            if (!isAdmin) {
+                const password = prompt("소스코드를 내보내려면 관리자 비밀번호를 입력하세요:");
+                if (!password) return;
+                
+                const hashedPassword = CryptoJS.SHA256(password).toString();
+                if (hashedPassword !== getSavedPasswordHash()) {
+                    alert("비밀번호가 일치하지 않아 소스코드를 추출할 수 없습니다.");
+                    return;
+                }
+                // 비밀번호가 맞으면 관리자 로그인 처리와 패널 활성화를 함께 수행
+                isAdmin = true;
+                document.getElementById('adminLoginBtn').innerText = "🔓 관리자 모드 로그아웃";
+                document.getElementById('adminPanel').style.display = "block";
+                document.getElementById('thAction').style.display = "table-cell";
+                document.getElementById('changePwBtn').style.display = "inline-block";
+                renderTable();
+            }
+
             let sortedFinalData = [...sigData].sort((a, b) => {
                 if (a.num !== b.num) return a.num - b.num;
                 return a.title.localeCompare(b.title, 'ko');
@@ -980,8 +999,6 @@
             const pwRegex = /(const DEFAULT_HASHED_PW\s*=\s*")([a-f0-9]{64})(";)/;
             updatedScript = updatedScript.replace(pwRegex, `$1${currentHashedPw}$3`);
 
-            const cleanRegex = /<tr class="[^"]*row-hidden[^"]*"[^>]*>[\s\S]*?<\/tr>/gi;
-            
             const textarea = document.createElement('textarea');
             textarea.value = "<!DOCTYPE html>\n" + updatedScript;
             document.body.appendChild(textarea);
