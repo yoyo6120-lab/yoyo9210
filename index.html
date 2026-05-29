@@ -25,7 +25,7 @@
             --admin-hover: #ff4d6d;
 
             /* 🏷️ 라이트 모드 태그 및 버튼 활성화용 스타일 */
-            --tag-all-bg: #ffeef1;       --tag-all-text: #ff4d6d;       /* [변경] 전체 버튼 활성화용 핑크 반전 컬러 */
+            --tag-all-bg: #ffeef1;       --tag-all-text: #ff4d6d;       
             --tag-hot-bg: #ffe4e6;       --tag-hot-text: #991b1b;       
             --tag-new-bg: #e0f2fe;       --tag-new-text: #075985;       
             --tag-star-bg: #fef9c3;      --tag-star-text: #854d0e;      
@@ -52,7 +52,7 @@
             --main-pink-dark: #ff8fa3;
             --admin-hover: #ff4d6d;
 
-            --tag-all-bg: rgba(255, 143, 163, 0.15); --tag-all-text: #ffb3c1; /* [변경] 다크모드용 전체 버튼 반전 컬러 */
+            --tag-all-bg: rgba(255, 143, 163, 0.15); --tag-all-text: #ffb3c1; 
             --tag-hot-bg: rgba(255, 80, 80, 0.15); --tag-hot-text: #ff5555;
             --tag-new-bg: rgba(0, 255, 255, 0.15); --tag-new-text: #00f7ff;
             --tag-star-bg: rgba(255, 215, 0, 0.15); --tag-star-text: gold;
@@ -189,15 +189,9 @@
         }
         .filter-btn:hover { transform: translateY(-2px); }
 
-        /* [수정] 활성화 스타일 - 다른 버튼들과 똑같이 외곽선/글자색 반전 스타일로 통일 */
-        .filter-btn.active[data-type="all"] { 
-            background-color: var(--tag-all-bg); 
-            color: var(--tag-all-text); 
-            border-color: var(--tag-all-text); 
-        }
+        /* 활성화 스타일 */
+        .filter-btn.active[data-type="all"] { background-color: var(--tag-all-bg); color: var(--tag-all-text); border-color: var(--tag-all-text); }
         .filter-btn.active[data-type="range"] { background-color: rgba(37, 99, 235, 0.1); color: #2563eb; border-color: #2563eb; }
-        
-        /* 활성화된 태그 필터 버튼 */
         .filter-btn.active[data-type="hot"] { background-color: var(--tag-hot-bg); color: var(--tag-hot-text); border-color: var(--tag-hot-text); }
         .filter-btn.active[data-type="new"] { background-color: var(--tag-new-bg); color: var(--tag-new-text); border-color: var(--tag-new-text); }
         .filter-btn.active[data-type="star"] { background-color: var(--tag-star-bg); color: var(--tag-star-text); border-color: var(--tag-star-text); }
@@ -361,29 +355,60 @@
         .badge-etc { background-color: var(--tag-etc-bg); color: var(--tag-etc-text); border-color: rgba(51, 65, 85, 0.15); }
         .badge-hidden { background-color: #eab308; color: black; }
 
-        /* 📱 모바일 반응형 */
+        /* 📱 모바일 반응형 스타일 (전체적으로 폰트 크기 +2px 업그레이드) */
         @media (max-width: 600px) {
-            /* 🔽 필터 버튼 모바일 가독성 최적화 수정본 */
+            /* 1. 상단 필터 버튼 영역 */
             .filter-section {
                 gap: 8px;
                 margin-bottom: 20px;
             }
             .filter-group {
-                gap: 4px; /* 버튼 사이 좌우 여백을 줄여 최대한 한 줄에 많이 배치 */
+                gap: 6px; 
             }
             .filter-btn {
-                padding: 6px 11px;  /* 안쪽 좌우 여백을 조정하여 글씨 크기 대비 알맞은 비율 유지 */
-                ont-size: 13px;     /* ⭐ 원래 원하셨던 시원한 글씨 크기 유지! */
-                border-radius: 12px; /* 깔끔한 사각형 형태 유지 */
+                padding: 7px 12px;   /* 글씨 크기에 비례해 터치 여백 미세 조절 */
+                font-size: 15px;     /* 13px -> 15px 변경 (시원하고 직관적인 버튼) */
+                border-radius: 12px; 
             }
-            /* 🔼 필터 버튼 모바일 최적화 끝 */
 
-            th, td { padding: 12px 8px; }
-            .num-col { width: 50px; font-size: 14px; }
-            .title-col { justify-content: space-between; align-items: center; gap: 6px; }
-            .title-text { white-space: normal; word-break: keep-all; font-size: 14px; line-height: 1.3; }
-            .badge-container { flex-direction: column; align-items: flex-end; gap: 3px; }
-            .badge { padding: 2px 5px; font-size: 10px; border-radius: 4px; }
+            /* 2. 테이블 내부 레이아웃 및 폰트 */
+            th, td { 
+                padding: 12px 8px; 
+            }
+            th {
+                font-size: 14px;     /* 12px -> 14px 변경 */
+            }
+            
+            /* 개수(숫자) 컬럼 */
+            .num-col { 
+                width: 60px;         /* 글자 확보를 위해 너비 미세 조정 */
+                font-size: 16px;     /* 14px -> 16px 변경 (숫자 가독성 확보) */
+            }
+            
+            /* 내용(제목) 컬럼 */
+            .title-col { 
+                justify-content: space-between; 
+                align-items: center; 
+                gap: 6px; 
+            }
+            .title-text { 
+                white-space: normal; 
+                word-break: keep-all; 
+                font-size: 16px;     /* 14px -> 16px 변경 (텍스트 눈에 잘 띄게 수정) */
+                line-height: 1.4; 
+            }
+            
+            /* 3. 태그 배지 영역 */
+            .badge-container { 
+                flex-direction: column; 
+                align-items: flex-end; 
+                gap: 4px; 
+            }
+            .badge { 
+                padding: 3px 6px; 
+                font-size: 12px;     /* 10px -> 12px 변경 */
+                border-radius: 5px; 
+            }
         }
     </style>
     <script>
@@ -455,7 +480,7 @@
                 </tr>
             </thead>
             <tbody id="sigTableBody">
-               </tbody>
+            </tbody>
         </table>
     </div>
 
@@ -609,324 +634,365 @@
         initTheme();
 
         function getSavedPasswordHash() {
-            return localStorage.getItem('seyeonAdminPwHash') || DEFAULT_HASHED_PW;
+            return localStorage.getItem('adminPwHash') || DEFAULT_HASHED_PW;
         }
 
         function toggleAdminMode() {
             if (!isAdmin) {
-                const inputPw = prompt("관리자 비밀번호를 입력하세요:");
-                if (inputPw === null) return;
-
-                const hashedInput = CryptoJS.SHA256(inputPw).toString();
-                const targetHash = getSavedPasswordHash();
-
-                if (hashedInput === targetHash) {
+                const password = prompt("관리자 비밀번호를 입력하세요:");
+                if (!password) return;
+                
+                const hashedPassword = CryptoJS.SHA256(password).toString();
+                if (hashedPassword === getSavedPasswordHash()) {
                     isAdmin = true;
-                    document.getElementById('adminLoginBtn').innerText = "🔒 관리자 모드 로그아웃";
-                    document.getElementById('changePwBtn').style.display = "inline-block";
+                    document.getElementById('adminLoginBtn').innerText = "🔓 관리자 모드 로그아웃";
                     document.getElementById('adminPanel').style.display = "block";
+                    document.getElementById('thAction').style.display = "table-cell";
+                    document.getElementById('changePwBtn').style.display = "inline-block";
+                    renderTable();
+                    alert("관리자 로그인 성공!");
                 } else {
-                    alert("비밀번호가 일치하지 않습니다.");
+                    alert("비밀번호가 틀렸습니다.");
                 }
             } else {
                 isAdmin = false;
                 editingIndex = null;
                 document.getElementById('adminLoginBtn').innerText = "🔒 관리자 모드 로그인";
-                document.getElementById('changePwBtn').style.display = "none";
                 document.getElementById('adminPanel').style.display = "none";
-                resetForm();
+                document.getElementById('thAction').style.display = "none";
+                document.getElementById('changePwBtn').style.display = "none";
+                renderTable();
+                alert("로그아웃 되었습니다.");
             }
-            applyFilters();
         }
 
         function changeAdminPassword() {
             if (!isAdmin) return;
-
-            const newPw = prompt("새로운 비밀번호를 입력하세요:");
-            if (newPw === null) return;
+            const currentPw = prompt("현재 비밀번호를 입력하세요:");
+            if (!currentPw) return;
             
-            const confirmPw = prompt("새로운 비밀번호를 한번 더 입력하세요:");
-            if (confirmPw === null) return;
-
-            if (newPw !== confirmPw) {
-                alert("입력하신 두 비밀번호가 일치하지 않습니다. 다시 시도해 주세요.");
+            const currentHash = CryptoJS.SHA256(currentPw).toString();
+            if (currentHash !== getSavedPasswordHash()) {
+                alert("현재 비밀번호가 일치하지 않습니다.");
                 return;
             }
-
-            if (newPw.trim() === "") {
-                alert("공백 비밀번호는 사용할 수 없습니다.");
+            
+            const newPw = prompt("새로운 비밀번호를 입력하세요:");
+            if (!newPw) return;
+            const newPwConfirm = prompt("새로운 비밀번호를 한 번 더 입력하세요:");
+            
+            if (newPw !== newPwConfirm) {
+                alert("새 비밀번호가 일치하지 않습니다.");
                 return;
             }
-
+            
             const newHash = CryptoJS.SHA256(newPw).toString();
-            localStorage.setItem('seyeonAdminPwHash', newHash);
-            alert("🔒 관리자 비밀번호가 성공적으로 변경되었습니다!");
+            localStorage.setItem('adminPwHash', newHash);
+            alert("비밀번호가 성공적으로 변경되었습니다.");
         }
 
-        function renderTable(data) {
+        function renderTable() {
             const tableBody = document.getElementById('sigTableBody');
             tableBody.innerHTML = '';
 
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="' + (isAdmin ? 3 : 2) + '" style="text-align:center; color:#64748b; padding: 50px 0;">검색 결과가 없습니다.</td></tr>';
-                return;
-            }
+            const searchKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
-            data.forEach((item, loopIdx) => {
-                const originIndex = sigData.findIndex((origin, origIdx) => origIdx === item._originalIdx);
-                if (originIndex === -1) return;
-                
-                if (!isAdmin && item.tags && item.tags.includes('hidden')) {
-                    return;
+            // 순서 보장 정렬 규칙 적용
+            let displayData = [...sigData].sort((a, b) => {
+                if (a.num !== b.num) return a.num - b.num;
+                return a.title.localeCompare(b.title, 'ko');
+            });
+
+            displayData.forEach((item, index) => {
+                const originalIndex = sigData.findIndex(o => o.num === item.num && o.title === item.title);
+
+                // 1. 카테고리 필터링
+                if (filterType === 'tag') {
+                    if (!item.tags || !item.tags.includes(filterValue)) return;
+                } else if (filterType === 'range') {
+                    if (item.num < filterValue[0] || item.num > filterValue[1]) return;
                 }
+
+                // 2. 검색창 필터링
+                if (searchKeyword) {
+                    const numMatch = item.num.toString().includes(searchKeyword);
+                    const titleMatch = item.title.toLowerCase().includes(searchKeyword);
+                    if (!numMatch && !titleMatch) return;
+                }
+
+                // 3. 숨김 항목 처리 (관리자는 투명하게 표시, 일반 유저는 제외)
+                const isHidden = item.tags && item.tags.includes('hidden');
+                if (isHidden && !isAdmin) return;
 
                 const tr = document.createElement('tr');
-                const itemTags = item.tags || [];
-                const isHidden = itemTags.includes('hidden');
+                if (isHidden) tr.classList.add('row-hidden');
 
-                if (isHidden) {
-                    tr.classList.add('row-hidden');
-                }
+                // 개수 열 생성
+                const tdNum = document.createElement('td');
+                tdNum.className = 'num-col';
+                tdNum.innerText = item.num;
+                tr.appendChild(tdNum);
 
-                let badgeInnerHtml = '';
-                if (isHidden) {
-                    badgeInnerHtml += '<span class="badge badge-hidden">숨김 목록</span>';
-                }
-                itemTags.forEach(tag => {
-                    if (tag === 'hot') badgeInnerHtml += '<span class="badge badge-hot">HOT 🔥</span>';
-                    else if (tag === 'new') badgeInnerHtml += '<span class="badge badge-new">NEW ✨</span>';
-                    else if (tag === 'star') badgeInnerHtml += '<span class="badge badge-star">열혈 ⭐</span>';
-                    else if (tag === 'bangsel') badgeInnerHtml += '<span class="badge badge-bangsel">방셀 📸</span>';
-                    else if (tag === 'roulette') badgeInnerHtml += '<span class="badge badge-roulette">룰렛 🎰</span>';
-                    else if (tag === 'etc') badgeInnerHtml += '<span class="badge badge-etc">기타 🎸</span>';
-                });
+                // 내용 열 생성
+                const tdTitle = document.createElement('td');
+                const titleWrapper = document.createElement('div');
+                titleWrapper.className = 'title-col';
 
-                let numTdContent = item.num.toLocaleString();
-                
-                let titleTdContent = `
-                    <div class="title-col">
-                        <span class="title-text">${item.title}</span>
-                        ${badgeInnerHtml ? `<div class="badge-container">${badgeInnerHtml}</div>` : ''}
-                    </div>
-                `;
-                let actionTd = '';
+                if (isAdmin && editingIndex === originalIndex) {
+                    const inputNum = document.createElement('input');
+                    inputNum.type = 'number';
+                    inputNum.className = 'inline-edit-input';
+                    inputNum.style.width = '70px';
+                    inputNum.value = item.num;
+                    inputNum.onclick = (e) => e.stopPropagation();
 
-                if (isAdmin) {
-                    if (editingIndex === originIndex) {
-                        numTdContent = `<input type="number" id="inlineEditNum" class="inline-edit-input" value="${item.num}" style="width:75px;">`;
-                        titleTdContent = `<input type="text" id="inlineEditTitle" class="inline-edit-input" value="${item.title}">`;
-                        
-                        actionTd = `
-                        <td class="action-col" style="display: table-cell; vertical-align: middle;">
-                            <div class="inline-tag-editor">
-                                <div class="tag-row" style="margin-bottom:4px;">
-                                    <button class="btn-inline-util" onclick="saveInlineEdit(${originIndex})" style="background-color:var(--main-pink); border-color:var(--main-pink); color:white;">저장</button>
-                                    <button class="btn-inline-util" onclick="cancelInlineEdit()">취소</button>
-                                </div>
-                            </div>
-                        </td>`;
-                    } else {
-                        actionTd = `
-                        <td class="action-col" style="display: table-cell;">
-                            <div class="inline-tag-editor">
-                                <div class="tag-row">
-                                    <button class="btn-inline-tag ${itemTags.length === 0 || (itemTags.length === 1 && isHidden) ? 'active-none' : ''}" onclick="resetTagsDirect(${originIndex})">일반</button>
-                                    <button class="btn-inline-tag ${itemTags.includes('hot') ? 'active-hot' : ''}" onclick="toggleTagDirect(${originIndex}, 'hot')">HOT</button>
-                                    <button class="btn-inline-tag ${itemTags.includes('new') ? 'active-new' : ''}" onclick="toggleTagDirect(${originIndex}, 'new')">NEW</button>
-                                    <button class="btn-inline-tag ${itemTags.includes('star') ? 'active-star' : ''}" onclick="toggleTagDirect(${originIndex}, 'star')">열혈</button>
-                                </div>
-                                <div class="tag-row">
-                                    <button class="btn-inline-tag ${itemTags.includes('bangsel') ? 'active-bangsel' : ''}" onclick="toggleTagDirect(${originIndex}, 'bangsel')">방셀</button>
-                                    <button class="btn-inline-tag ${itemTags.includes('roulette') ? 'active-roulette' : ''}" onclick="toggleTagDirect(${originIndex}, 'roulette')">룰렛</button>
-                                    <button class="btn-inline-tag ${itemTags.includes('etc') ? 'active-etc' : ''}" onclick="toggleTagDirect(${originIndex}, 'etc')">기타</button>
-                                    <button class="btn-inline-util" onclick="startInlineEdit(${originIndex})">수정</button>
-                                    <button class="btn-inline-util btn-inline-hide ${isHidden ? 'active-hidden' : ''}" onclick="toggleHideItem(${originIndex})">${isHidden ? '해제' : '숨김'}</button>
-                                    <button class="btn-inline-util btn-inline-del" onclick="deleteSigItem(${originIndex})">삭제</button>
-                                </div>
-                            </div>
-                        </td>`;
+                    const inputTitle = document.createElement('input');
+                    inputTitle.type = 'text';
+                    inputTitle.className = 'inline-edit-input';
+                    inputTitle.style.flexGrow = '1';
+                    inputTitle.value = item.title;
+                    inputTitle.onclick = (e) => e.stopPropagation();
+                    
+                    inputTitle.onkeydown = (e) => {
+                        if (e.key === 'Enter') saveInlineEdit(originalIndex, inputNum.value, inputTitle.value);
+                    };
+
+                    titleWrapper.appendChild(inputNum);
+                    titleWrapper.appendChild(inputTitle);
+                } else {
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'title-text';
+                    textSpan.innerText = item.title;
+                    titleWrapper.appendChild(textSpan);
+
+                    const badgeContainer = document.createElement('div');
+                    badgeContainer.className = 'badge-container';
+
+                    if (item.tags) {
+                        if (item.tags.includes('hidden')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-hidden';
+                            badge.innerText = '숨김';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('hot')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-hot';
+                            badge.innerText = 'HOT 🔥';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('new')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-new';
+                            badge.innerText = 'NEW ✨';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('star')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-star';
+                            badge.innerText = '열혈 ⭐';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('bangsel')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-bangsel';
+                            badge.innerText = '방셀 📸';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('roulette')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-roulette';
+                            badge.innerText = '룰렛 🎰';
+                            badgeContainer.appendChild(badge);
+                        }
+                        if (item.tags.includes('etc')) {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge badge-etc';
+                            badge.innerText = '기타 🎸';
+                            badgeContainer.appendChild(badge);
+                        }
                     }
+                    titleWrapper.appendChild(badgeContainer);
                 }
 
-                tr.innerHTML = `
-                    <td class="num-col" style="vertical-align: middle;">${numTdContent}</td>
-                    <td style="vertical-align: middle;">${titleTdContent}</td>
-                    ${actionTd}
-                `;
+                tdTitle.appendChild(titleWrapper);
+                tr.appendChild(tdTitle);
+
+                // 관리자 액션 열 생성
+                if (isAdmin) {
+                    const tdAction = document.createElement('td');
+                    tdAction.className = 'action-col';
+                    tdAction.style.display = 'table-cell';
+
+                    const editorDiv = document.createElement('div');
+                    editorDiv.className = 'inline-tag-editor';
+
+                    // 첫 번째 줄: 태그 원클릭 지정 토글 버튼
+                    const tagRow = document.createElement('div');
+                    tagRow.className = 'tag-row';
+
+                    const tagTypes = [
+                        { key: 'hot', label: 'HOT' },
+                        { key: 'new', label: 'NEW' },
+                        { key: 'star', label: '열혈' },
+                        { key: 'bangsel', label: '방셀' },
+                        { key: 'roulette', label: '룰렛' },
+                        { key: 'etc', label: '기타' }
+                    ];
+
+                    tagTypes.forEach(t => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-inline-tag';
+                        const hasTag = item.tags && item.tags.includes(t.key);
+                        if (hasTag) btn.classList.add('active-' + t.key);
+                        btn.innerText = t.label;
+                        btn.onclick = () => toggleInlineTag(originalIndex, t.key);
+                        tagRow.appendChild(btn);
+                    });
+                    editorDiv.appendChild(tagRow);
+
+                    // 두 번째 줄: 편집, 숨김, 삭제 유틸 제어 버튼
+                    const utilRow = document.createElement('div');
+                    utilRow.className = 'tag-row';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn-inline-util';
+                    if (editingIndex === originalIndex) {
+                        editBtn.innerText = '💾 저장';
+                        editBtn.style.backgroundColor = '#22c55e';
+                        editBtn.style.color = 'white';
+                        editBtn.onclick = () => {
+                            const inputs = titleWrapper.querySelectorAll('.inline-edit-input');
+                            saveInlineEdit(originalIndex, inputs[0].value, inputs[1].value);
+                        };
+                    } else {
+                        editBtn.innerText = '✏️ 수정';
+                        editBtn.onclick = () => { editingIndex = originalIndex; renderTable(); };
+                    }
+                    utilRow.appendChild(editBtn);
+
+                    const hideBtn = document.createElement('button');
+                    hideBtn.className = 'btn-inline-util btn-inline-hide';
+                    if (isHidden) hideBtn.classList.add('active-hidden');
+                    hideBtn.innerText = isHidden ? '👁️ 보이기' : '🚫 숨기기';
+                    hideBtn.onclick = () => toggleInlineTag(originalIndex, 'hidden');
+                    utilRow.appendChild(hideBtn);
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn-inline-util btn-inline-del';
+                    delBtn.innerText = '🗑️ 삭제';
+                    delBtn.onclick = () => deleteSigItem(originalIndex);
+                    utilRow.appendChild(delBtn);
+
+                    editorDiv.appendChild(utilRow);
+                    tdAction.appendChild(editorDiv);
+                    tr.appendChild(tdAction);
+                }
+
                 tableBody.appendChild(tr);
             });
         }
 
-        function toggleTagDirect(index, targetTag) {
-            if (!sigData[index].tags) {
-                sigData[index].tags = [];
-            }
-            
-            const tagIdx = sigData[index].tags.indexOf(targetTag);
-            if (tagIdx > -1) {
-                sigData[index].tags.splice(tagIdx, 1); 
-            } else {
-                sigData[index].tags.push(targetTag);   
-            }
-            saveAndRefresh();
+        function filterData(type, value, btnElement) {
+            filterType = type;
+            filterValue = value;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            renderTable();
         }
 
-        function resetTagsDirect(index) {
-            const isHidden = sigData[index].tags ? sigData[index].tags.includes('hidden') : false;
-            sigData[index].tags = isHidden ? ['hidden'] : [];
-            saveAndRefresh();
-        }
-
-        function startInlineEdit(index) {
-            editingIndex = index;
-            applyFilters();
-        }
-
-        function cancelInlineEdit() {
-            editingIndex = null;
-            applyFilters();
-        }
-
-        function saveInlineEdit(index) {
-            const editNum = parseInt(document.getElementById('inlineEditNum').value);
-            const editTitle = document.getElementById('inlineEditTitle').value.trim();
-
-            if (!editNum || !editTitle) {
-                alert("개수와 내용을 모두 올바르게 입력해야 수정이 완료됩니다.");
-                return;
-            }
-
-            sigData[index].num = editNum;
-            sigData[index].title = editTitle;
-            
-            editingIndex = null;
-            saveAndRefresh();
-        }
-
-        function toggleHideItem(index) {
-            if (!sigData[index].tags) {
-                sigData[index].tags = [];
-            }
-            
-            const findIdx = sigData[index].tags.indexOf('hidden');
-            if (findIdx > -1) {
-                sigData[index].tags.splice(findIdx, 1); 
-            } else {
-                sigData[index].tags.push('hidden'); 
-            }
-            
-            saveAndRefresh();
-        }
+        document.getElementById('searchInput').addEventListener('input', renderTable);
 
         function addSigItem() {
-            const numVal = parseInt(document.getElementById('formNum').value);
-            const titleVal = document.getElementById('formTitle').value.trim();
-            const tagVal = document.getElementById('formTag').value;
+            const numInput = document.getElementById('formNum');
+            const titleInput = document.getElementById('formTitle');
+            const tagSelect = document.getElementById('formTag');
 
-            if (!numVal || !titleVal) {
-                alert("개수와 내용을 정확하게 입력해주세요.");
+            const num = parseInt(numInput.value);
+            const title = titleInput.value.trim();
+            const selectedTag = tagSelect.value;
+
+            if (!num || !title) {
+                alert("개수와 내용을 정확히 입력하세요.");
                 return;
             }
 
-            const itemData = { num: numVal, title: titleVal, tags: tagVal ? [tagVal] : [] };
-            sigData.push(itemData);
+            const newTags = selectedTag ? [selectedTag] : [];
+            sigData.push({ num, title, tags: newTags });
+            
+            numInput.value = '';
+            titleInput.value = '';
+            tagSelect.value = '';
 
-            saveAndRefresh();
-            resetForm();
+            renderTable();
+            alert("새 항목이 하단 리스트에 추가 정렬되었습니다!");
+        }
+
+        function toggleInlineTag(index, tag) {
+            if (!sigData[index].tags) sigData[index].tags = [];
+            const tagIdx = sigData[index].tags.indexOf(tag);
+            if (tagIdx > -1) {
+                sigData[index].tags.splice(tagIdx, 1);
+            } else {
+                sigData[index].tags.push(tag);
+            }
+            renderTable();
+        }
+
+        function saveInlineEdit(index, newNum, newTitle) {
+            const parsedNum = parseInt(newNum);
+            const parsedTitle = newTitle.trim();
+
+            if (!parsedNum || !parsedTitle) {
+                alert("개수와 내용을 올바르게 입력해 주세요.");
+                return;
+            }
+
+            sigData[index].num = parsedNum;
+            sigData[index].title = parsedTitle;
+            editingIndex = null;
+            renderTable();
         }
 
         function deleteSigItem(index) {
-            if (confirm(`'${sigData[index].title}' 항목을 목록에서 삭제하시겠습니까?`)) {
+            if (confirm("정말 이 항목을 삭제하시겠습니까?")) {
                 sigData.splice(index, 1);
-                if (editingIndex === index) editingIndex = null;
-                saveAndRefresh();
-            }
-        }
-
-        function resetForm() {
-            document.getElementById('formNum').value = "";
-            document.getElementById('formTitle').value = "";
-            document.getElementById('formTag').value = "";
-        }
-
-        function saveAndRefresh() {
-            localStorage.setItem('seyeonSigData', JSON.stringify(sigData));
-            applyFilters();
-        }
-
-        function filterData(type, value, buttonElement) {
-            filterType = type;
-            filterValue = value;
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            buttonElement.classList.add('active');
-
-            document.getElementById('searchInput').value = '';
-            applyFilters();
-        }
-
-        function applyFilters() {
-            const searchText = document.getElementById('searchInput').value.trim().toLowerCase();
-            
-            let filtered = sigData.map((item, idx) => ({...item, _originalIdx: idx}));
-
-            if (filterType === 'tag') {
-                filtered = filtered.filter(item => item.tags && item.tags.includes(filterValue));
-            } else if (filterType === 'range') {
-                filtered = filtered.filter(item => item.num >= filterValue[0] && item.num <= filterValue[1]);
-            }
-
-            if (searchText) {
-                filtered = filtered.filter(item => 
-                    item.num.toString().includes(searchText) || 
-                    item.title.toLowerCase().includes(searchText)
-                );
-            }
-
-            filtered.sort((a, b) => a.num - b.num);
-            renderTable(filtered);
-            
-            const thAction = document.getElementById('thAction');
-            if (thAction) {
-                thAction.style.display = isAdmin ? "table-cell" : "none";
+                editingIndex = null;
+                renderTable();
             }
         }
 
         function exportUpdatedHtmlSource() {
-            const inputPw = prompt("소스코드를 추출하려면 관리자 비밀번호를 입력하세요:");
-            if (inputPw === null) return;
-
-            const hashedInput = CryptoJS.SHA256(inputPw).toString();
-            const targetHash = getSavedPasswordHash();
-
-            if (hashedInput !== targetHash) {
-                alert("비밀번호가 일치하지 않습니다.");
-                return;
-            }
-
-            const sortedData = [...sigData].sort((a, b) => a.num - b.num);
-            const wholeDocumentString = document.documentElement.outerHTML;
-            const regex = /(const\s+defaultData\s*=\s*\[)[\s\S]*?(\];)/;
-            const formattedDataJson = "\n" + sortedData.map(item => `            { num: ${item.num}, title: "${item.title}", tags: ${JSON.stringify(item.tags)} }`).join(",\n") + "\n        ";
-            
-            let updatedSource = "<!DOCTYPE html>\n<html lang=\"ko\">\n" + wholeDocumentString + "\n</html>";
-            
-            updatedSource = updatedSource.replace(/<div id="adminPanel" class="admin-panel" style="display:\s*(block|none);?">/g, '<div id="adminPanel" class="admin-panel">');
-            updatedSource = updatedSource.replace(/<button id="changePwBtn" class="admin-link-btn" style="display:\s*(inline-block|none);?">/g, '<button id="changePwBtn" class="admin-link-btn">');
-            updatedSource = updatedSource.replace(/🔒 관리자 모드 로그인|🔒 관리자 모드 로그인/g, '🔒 관리자 모드 로그인');
-            
-            updatedSource = updatedSource.replace(regex, `$1${formattedDataJson}$2`);
-
-            navigator.clipboard.writeText(updatedSource).then(() => {
-                alert("📋 현재까지 수정된 전체 소스코드가 클립보드에 성공적으로 복사되었습니다!\n\n이 상태에서 기존 메모장이나 index.html 파일을 열어 전체 선택(Ctrl+A) 후 붙여넣기(Ctrl+V) 하시면 영구 저장됩니다.");
-            }).catch(err => {
-                alert("클립보드 복사 중 오류가 발생했습니다. 브라우저 보안 권한을 확인해주세요.");
+            let sortedFinalData = [...sigData].sort((a, b) => {
+                if (a.num !== b.num) return a.num - b.num;
+                return a.title.localeCompare(b.title, 'ko');
             });
+
+            const currentHashedPw = getSavedPasswordHash();
+            const dataString = JSON.stringify(sortedFinalData, null, 12);
+            const currentScript = document.documentElement.outerHTML;
+
+            const dataRegex = /(const defaultData\s*=\s*\[)([\s\S]*?)(\];)/;
+            let updatedScript = currentScript.replace(dataRegex, `$1\n${dataString.substring(1, dataString.length - 1)}$3`);
+
+            const pwRegex = /(const DEFAULT_HASHED_PW\s*=\s*")([a-f0-9]{64})(";)/;
+            updatedScript = updatedScript.replace(pwRegex, `$1${currentHashedPw}$3`);
+
+            const cleanRegex = /<tr class="[^"]*row-hidden[^"]*"[^>]*>[\s\S]*?<\/tr>/gi;
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = "<!DOCTYPE html>\n" + updatedScript;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            alert("🎉 변경사항 및 패스워드가 보존된 최종 배포용 HTML 소스코드가 클립보드에 복사되었습니다! 메모장이나 서버 소스에 그대로 덮어쓰기 하세요.");
         }
 
-        document.getElementById('searchInput').addEventListener('input', applyFilters);
-        applyFilters();
+        renderTable();
     </script>
-
 </body>
 </html>
