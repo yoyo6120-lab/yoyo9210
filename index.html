@@ -355,60 +355,18 @@
         .badge-etc { background-color: var(--tag-etc-bg); color: var(--tag-etc-text); border-color: rgba(51, 65, 85, 0.15); }
         .badge-hidden { background-color: #eab308; color: black; }
 
-        /* 📱 모바일 반응형 스타일 (전체적으로 폰트 크기 +2px 업그레이드) */
+        /* 📱 모바일 반응형 스타일 */
         @media (max-width: 600px) {
-            /* 1. 상단 필터 버튼 영역 */
-            .filter-section {
-                gap: 8px;
-                margin-bottom: 20px;
-            }
-            .filter-group {
-                gap: 6px; 
-            }
-            .filter-btn {
-                padding: 7px 12px;   /* 글씨 크기에 비례해 터치 여백 미세 조절 */
-                font-size: 15px;     /* 13px -> 15px 변경 (시원하고 직관적인 버튼) */
-                border-radius: 12px; 
-            }
-
-            /* 2. 테이블 내부 레이아웃 및 폰트 */
-            th, td { 
-                padding: 12px 8px; 
-            }
-            th {
-                font-size: 14px;     /* 12px -> 14px 변경 */
-            }
-            
-            /* 개수(숫자) 컬럼 */
-            .num-col { 
-                width: 60px;         /* 글자 확보를 위해 너비 미세 조정 */
-                font-size: 16px;     /* 14px -> 16px 변경 (숫자 가독성 확보) */
-            }
-            
-            /* 내용(제목) 컬럼 */
-            .title-col { 
-                justify-content: space-between; 
-                align-items: center; 
-                gap: 6px; 
-            }
-            .title-text { 
-                white-space: normal; 
-                word-break: keep-all; 
-                font-size: 16px;     /* 14px -> 16px 변경 (텍스트 눈에 잘 띄게 수정) */
-                line-height: 1.4; 
-            }
-            
-            /* 3. 태그 배지 영역 */
-            .badge-container { 
-                flex-direction: column; 
-                align-items: flex-end; 
-                gap: 4px; 
-            }
-            .badge { 
-                padding: 3px 6px; 
-                font-size: 12px;     /* 10px -> 12px 변경 */
-                border-radius: 5px; 
-            }
+            .filter-section { gap: 8px; margin-bottom: 20px; }
+            .filter-group { gap: 6px; }
+            .filter-btn { padding: 7px 12px; font-size: 15px; border-radius: 12px; }
+            th, td { padding: 12px 8px; }
+            th { font-size: 14px; }
+            .num-col { width: 60px; font-size: 16px; }
+            .title-col { justify-content: space-between; align-items: center; gap: 6px; }
+            .title-text { white-space: normal; word-break: keep-all; font-size: 16px; line-height: 1.4; }
+            .badge-container { flex-direction: column; align-items: flex-end; gap: 4px; }
+            .badge { padding: 3px 6px; font-size: 12px; border-radius: 5px; }
         }
     </style>
     <script>
@@ -697,7 +655,6 @@
 
             const searchKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
 
-            // 순서 보장 정렬 규칙 적용
             let displayData = [...sigData].sort((a, b) => {
                 if (a.num !== b.num) return a.num - b.num;
                 return a.title.localeCompare(b.title, 'ko');
@@ -706,34 +663,29 @@
             displayData.forEach((item, index) => {
                 const originalIndex = sigData.findIndex(o => o.num === item.num && o.title === item.title);
 
-                // 1. 카테고리 필터링
                 if (filterType === 'tag') {
                     if (!item.tags || !item.tags.includes(filterValue)) return;
                 } else if (filterType === 'range') {
                     if (item.num < filterValue[0] || item.num > filterValue[1]) return;
                 }
 
-                // 2. 검색창 필터링
                 if (searchKeyword) {
                     const numMatch = item.num.toString().includes(searchKeyword);
                     const titleMatch = item.title.toLowerCase().includes(searchKeyword);
                     if (!numMatch && !titleMatch) return;
                 }
 
-                // 3. 숨김 항목 처리 (관리자는 투명하게 표시, 일반 유저는 제외)
                 const isHidden = item.tags && item.tags.includes('hidden');
                 if (isHidden && !isAdmin) return;
 
                 const tr = document.createElement('tr');
                 if (isHidden) tr.classList.add('row-hidden');
 
-                // 개수 열 생성
                 const tdNum = document.createElement('td');
                 tdNum.className = 'num-col';
                 tdNum.innerText = item.num;
                 tr.appendChild(tdNum);
 
-                // 내용 열 생성
                 const tdTitle = document.createElement('td');
                 const titleWrapper = document.createElement('div');
                 titleWrapper.className = 'title-col';
@@ -818,7 +770,6 @@
                 tdTitle.appendChild(titleWrapper);
                 tr.appendChild(tdTitle);
 
-                // 관리자 액션 열 생성
                 if (isAdmin) {
                     const tdAction = document.createElement('td');
                     tdAction.className = 'action-col';
@@ -827,7 +778,6 @@
                     const editorDiv = document.createElement('div');
                     editorDiv.className = 'inline-tag-editor';
 
-                    // 첫 번째 줄: 태그 원클릭 지정 토글 버튼
                     const tagRow = document.createElement('div');
                     tagRow.className = 'tag-row';
 
@@ -851,7 +801,6 @@
                     });
                     editorDiv.appendChild(tagRow);
 
-                    // 두 번째 줄: 편집, 숨김, 삭제 유틸 제어 버튼
                     const utilRow = document.createElement('div');
                     utilRow.className = 'tag-row';
 
@@ -965,9 +914,9 @@
         }
 
         function exportUpdatedHtmlSource() {
-            // [복구 완료] 로그인 상태가 아닐 때 📋 버튼을 누르면 비밀번호 확인 창을 띄웁니다.
+            // [독립 처리 완료] 관리자가 아닐 때 📋를 누르면 일회성 비밀번호 인증만 거치고, 관리자 상태(isAdmin)를 변경하지 않습니다.
             if (!isAdmin) {
-                const password = prompt("소스코드를 내보내려면 관리자 비밀번호를 입력하세요:");
+                const password = prompt("소스코드를 내보내려면 패스워드를 입력하세요:");
                 if (!password) return;
                 
                 const hashedPassword = CryptoJS.SHA256(password).toString();
@@ -975,13 +924,6 @@
                     alert("비밀번호가 일치하지 않아 소스코드를 추출할 수 없습니다.");
                     return;
                 }
-                // 비밀번호가 맞으면 관리자 로그인 처리와 패널 활성화를 함께 수행
-                isAdmin = true;
-                document.getElementById('adminLoginBtn').innerText = "🔓 관리자 모드 로그아웃";
-                document.getElementById('adminPanel').style.display = "block";
-                document.getElementById('thAction').style.display = "table-cell";
-                document.getElementById('changePwBtn').style.display = "inline-block";
-                renderTable();
             }
 
             let sortedFinalData = [...sigData].sort((a, b) => {
@@ -1006,7 +948,7 @@
             document.execCommand('copy');
             document.body.removeChild(textarea);
 
-            alert("🎉 변경사항 및 패스워드가 보존된 최종 배포용 HTML 소스코드가 클립보드에 복사되었습니다! 메모장이나 서버 소스에 그대로 덮어쓰기 하세요.");
+            alert("🎉 변경사항 및 패스워드가 보존된 최종 배포용 HTML 소스코드가 클립보드에 복사되었습니다! 화면 변화 없이 백그라운드 복사가 완료되었으니 소스에 덮어쓰기 하세요.");
         }
 
         renderTable();
